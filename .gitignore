@@ -1,0 +1,7 @@
+/cmake-build-debug/*
+/new_generated/*
+/build/*
+/third_party/antlr4-cpp-runtime-4.7.2/*
+/*.zip
+/*.docx
+/.idea/*
