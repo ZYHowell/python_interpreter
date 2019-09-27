@@ -12,135 +12,132 @@
 class  Python3Lexer : public antlr4::Lexer {
 public:
   enum {
-    STRING = 1, NUMBER = 2, INTEGER = 3, DEF = 4, RETURN = 5, RAISE = 6, 
-    FROM = 7, IMPORT = 8, AS = 9, GLOBAL = 10, NONLOCAL = 11, ASSERT = 12, 
-    IF = 13, ELIF = 14, ELSE = 15, WHILE = 16, FOR = 17, IN = 18, TRY = 19, 
-    FINALLY = 20, WITH = 21, EXCEPT = 22, LAMBDA = 23, OR = 24, AND = 25, 
-    NOT = 26, IS = 27, NONE = 28, TRUE = 29, FALSE = 30, CLASS = 31, YIELD = 32, 
-    DEL = 33, PASS = 34, CONTINUE = 35, BREAK = 36, ASYNC = 37, AWAIT = 38, 
-    NEWLINE = 39, NAME = 40, STRING_LITERAL = 41, BYTES_LITERAL = 42, DECIMAL_INTEGER = 43, 
-    OCT_INTEGER = 44, HEX_INTEGER = 45, BIN_INTEGER = 46, FLOAT_NUMBER = 47, 
-    IMAG_NUMBER = 48, DOT = 49, ELLIPSIS = 50, STAR = 51, OPEN_PAREN = 52, 
-    CLOSE_PAREN = 53, COMMA = 54, COLON = 55, SEMI_COLON = 56, POWER = 57, 
-    ASSIGN = 58, OPEN_BRACK = 59, CLOSE_BRACK = 60, OR_OP = 61, XOR = 62, 
-    AND_OP = 63, LEFT_SHIFT = 64, RIGHT_SHIFT = 65, ADD = 66, MINUS = 67, 
-    DIV = 68, MOD = 69, IDIV = 70, NOT_OP = 71, OPEN_BRACE = 72, CLOSE_BRACE = 73, 
-    LESS_THAN = 74, GREATER_THAN = 75, EQUALS = 76, GT_EQ = 77, LT_EQ = 78, 
-    NOT_EQ_1 = 79, NOT_EQ_2 = 80, AT = 81, ARROW = 82, ADD_ASSIGN = 83, 
-    SUB_ASSIGN = 84, MULT_ASSIGN = 85, AT_ASSIGN = 86, DIV_ASSIGN = 87, 
-    MOD_ASSIGN = 88, AND_ASSIGN = 89, OR_ASSIGN = 90, XOR_ASSIGN = 91, LEFT_SHIFT_ASSIGN = 92, 
-    RIGHT_SHIFT_ASSIGN = 93, POWER_ASSIGN = 94, IDIV_ASSIGN = 95, SKIP_ = 96, 
-    UNKNOWN_CHAR = 97
+    STRING = 1, NUMBER = 2, INTEGER = 3, DEF = 4, RETURN = 5, IF = 6, ELIF = 7, 
+    ELSE = 8, WHILE = 9, FOR = 10, IN = 11, OR = 12, AND = 13, NOT = 14, 
+    NONE = 15, TRUE = 16, FALSE = 17, CONTINUE = 18, BREAK = 19, NEWLINE = 20, 
+    NAME = 21, STRING_LITERAL = 22, BYTES_LITERAL = 23, DECIMAL_INTEGER = 24, 
+    OCT_INTEGER = 25, HEX_INTEGER = 26, BIN_INTEGER = 27, FLOAT_NUMBER = 28, 
+    IMAG_NUMBER = 29, DOT = 30, ELLIPSIS = 31, STAR = 32, OPEN_PAREN = 33, 
+    CLOSE_PAREN = 34, COMMA = 35, COLON = 36, SEMI_COLON = 37, POWER = 38, 
+    ASSIGN = 39, OPEN_BRACK = 40, CLOSE_BRACK = 41, OR_OP = 42, XOR = 43, 
+    AND_OP = 44, LEFT_SHIFT = 45, RIGHT_SHIFT = 46, ADD = 47, MINUS = 48, 
+    DIV = 49, MOD = 50, IDIV = 51, NOT_OP = 52, OPEN_BRACE = 53, CLOSE_BRACE = 54, 
+    LESS_THAN = 55, GREATER_THAN = 56, EQUALS = 57, GT_EQ = 58, LT_EQ = 59, 
+    NOT_EQ_1 = 60, NOT_EQ_2 = 61, AT = 62, ARROW = 63, ADD_ASSIGN = 64, 
+    SUB_ASSIGN = 65, MULT_ASSIGN = 66, AT_ASSIGN = 67, DIV_ASSIGN = 68, 
+    MOD_ASSIGN = 69, AND_ASSIGN = 70, OR_ASSIGN = 71, XOR_ASSIGN = 72, LEFT_SHIFT_ASSIGN = 73, 
+    RIGHT_SHIFT_ASSIGN = 74, POWER_ASSIGN = 75, IDIV_ASSIGN = 76, SKIP_ = 77, 
+    UNKNOWN_CHAR = 78
   };
 
   Python3Lexer(antlr4::CharStream *input);
   ~Python3Lexer();
 
 
-    // A queue where extra tokens are pushed on (see the NEWLINE lexer rule).
-private: std::list<antlr4::Token*> tokens ;
-    // The stack that keeps track of the indentation level.
-private: std::stack<int> indents ;
-    // The amount of opened braces, brackets and parenthesis.
-private: int opened = 0;
-    // The most recently produced token.
-private: antlr4::Token* lastToken = nullptr;
+      // A queue where extra tokens are pushed on (see the NEWLINE lexer rule).
+   private: std::list<antlr4::Token*> tokens ;
+       // The stack that keeps track of the indentation level.
+   private: std::stack<int> indents ;
+       // The amount of opened braces, brackets and parenthesis.
+   private: int opened = 0;
+       // The most recently produced token.
+   private: antlr4::Token* lastToken = nullptr;
 
-public: void emit(std::unique_ptr<antlr4::Token> t) override {
-      token.release();
-      token=std::move(t);
-      
-      tokens.push_back(token.get());
-//      std::cout<<t->toString()<<std::endl;
-    }
+   public: void emit(std::unique_ptr<antlr4::Token> t) override {
+         token.release();
+         token=std::move(t);
 
-   
-public: std::unique_ptr<antlr4::Token> nextToken() override {
-      // Check if the end-of-file is ahead and there are still some DEDENTS expected.
-      if (_input->LA(1) == EOF && !this->indents.empty()) {
-        // Remove any trailing EOF tokens from our buffer.
-        for(auto i=tokens.rbegin();i!=tokens.rend();){
-            auto tmp=i;
-            i++;
-            if((*tmp)->getType()==EOF){
-                tokens.erase(tmp.base());
-            }
-        }
-        
+         tokens.push_back(token.get());
+   //      std::cout<<t->toString()<<std::endl;
+       }
 
-        // First emit an extra line break that serves as the end of the statement.
-        std::unique_ptr<antlr4::Token> tmp=commonToken(Python3Parser::NEWLINE, "\n");
-        this->emit(std::move(tmp));
 
-        // Now emit as much DEDENT tokens as needed.
-        while (!indents.empty()) {
-            auto tmp=createDedent();
-          this->emit(std::move(tmp));
-          indents.pop();
-        }
+   public: std::unique_ptr<antlr4::Token> nextToken() override {
+         // Check if the end-of-file is ahead and there are still some DEDENTS expected.
+         if (_input->LA(1) == EOF && !this->indents.empty()) {
+           // Remove any trailing EOF tokens from our buffer.
+           for(auto i=tokens.rbegin();i!=tokens.rend();){
+               auto tmp=i;
+               i++;
+               if((*tmp)->getType()==EOF){
+                   tokens.erase(tmp.base());
+               }
+           }
 
-        // Put the EOF back on the token stream.
-        this->emit(commonToken(Python3Parser::EOF, "<EOF>"));
-      }
 
-      std::unique_ptr<antlr4::Token> next = Lexer::nextToken();
+           // First emit an extra line break that serves as the end of the statement.
+           std::unique_ptr<antlr4::Token> tmp=commonToken(Python3Parser::NEWLINE, "\n");
+           this->emit(std::move(tmp));
 
-      if (next->getChannel() == antlr4::Token::DEFAULT_CHANNEL) {
-        // Keep track of the last token on the default channel.
-        this->lastToken = next.get();
-      }
-        if (tokens.empty()) {
-            return std::move(next);
-        } else{
-            next.release();
-            auto tmp=tokens.front();
-            tokens.pop_front();
-            return std::unique_ptr<antlr4::Token>(tmp);
-        }
-     
-    }
+           // Now emit as much DEDENT tokens as needed.
+           while (!indents.empty()) {
+               auto tmp=createDedent();
+             this->emit(std::move(tmp));
+             indents.pop();
+           }
 
-private: std::unique_ptr<antlr4::Token> createDedent() {
-      auto dedent = commonToken(Python3Parser::DEDENT, "");
-      dedent->setLine(this->lastToken->getLine());
-      return std::move(dedent);
-    }
+           // Put the EOF back on the token stream.
+           this->emit(commonToken(Python3Parser::EOF, "<EOF>"));
+         }
 
-private: std::unique_ptr<antlr4::CommonToken> commonToken(int type,std::string text) {
-      int stop = this->getCharIndex() - 1;
-      int start = text.empty() ? stop : stop - text.length() + 1;
-      return std::move(std::unique_ptr<antlr4::CommonToken>(new antlr4::CommonToken({ this, _input },
-              type,
-              DEFAULT_TOKEN_CHANNEL, start, stop)));
-    }
+         std::unique_ptr<antlr4::Token> next = Lexer::nextToken();
 
-    // Calculates the indentation of the provided spaces, taking the
-    // following rules into account:
-    //
-    // "Tabs are replaced (from left to right) by one to eight spaces
-    //  such that the total number of characters up to and including
-    //  the replacement is a multiple of eight [...]"
-    //
-    //  -- https://docs.python.org/3.1/reference/lexical_analysis.html#indentation
-    static int getIndentationCount(std::string spaces) {
-      int count = 0;
-      for (char ch : spaces) {
-        switch (ch) {
-          case '\t':
-            count += 8 - (count % 8);
-            break;
-          default:
-            // A normal space char.
-            count++;
-        }
-      }
+         if (next->getChannel() == antlr4::Token::DEFAULT_CHANNEL) {
+           // Keep track of the last token on the default channel.
+           this->lastToken = next.get();
+         }
+           if (tokens.empty()) {
+               return std::move(next);
+           } else{
+               next.release();
+               auto tmp=tokens.front();
+               tokens.pop_front();
+               return std::unique_ptr<antlr4::Token>(tmp);
+           }
 
-      return count;
-    }
+       }
 
-    bool atStartOfInput() {
-      return Lexer::getCharPositionInLine() == 0 && Lexer::getLine() == 1;
-    }
+   private: std::unique_ptr<antlr4::Token> createDedent() {
+         auto dedent = commonToken(Python3Parser::DEDENT, "");
+         dedent->setLine(this->lastToken->getLine());
+         return std::move(dedent);
+       }
+
+   private: std::unique_ptr<antlr4::CommonToken> commonToken(int type,std::string text) {
+         int stop = this->getCharIndex() - 1;
+         int start = text.empty() ? stop : stop - text.length() + 1;
+         return std::move(std::unique_ptr<antlr4::CommonToken>(new antlr4::CommonToken({ this, _input },
+                 type,
+                 DEFAULT_TOKEN_CHANNEL, start, stop)));
+       }
+
+       // Calculates the indentation of the provided spaces, taking the
+       // following rules into account:
+       //
+       // "Tabs are replaced (from left to right) by one to eight spaces
+       //  such that the total number of characters up to and including
+       //  the replacement is a multiple of eight [...]"
+       //
+       //  -- https://docs.python.org/3.1/reference/lexical_analysis.html#indentation
+       static int getIndentationCount(std::string spaces) {
+         int count = 0;
+         for (char ch : spaces) {
+           switch (ch) {
+             case '\t':
+               count += 8 - (count % 8);
+               break;
+             default:
+               // A normal space char.
+               count++;
+           }
+         }
+
+         return count;
+       }
+
+       bool atStartOfInput() {
+         return Lexer::getCharPositionInLine() == 0 && Lexer::getLine() == 1;
+       }
 
   virtual std::string getGrammarFileName() const override;
   virtual const std::vector<std::string>& getRuleNames() const override;
