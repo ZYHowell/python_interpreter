@@ -118,8 +118,7 @@ simple_stmt: small_stmt  NEWLINE;
 small_stmt: expr_stmt | flow_stmt;
 expr_stmt: testlist ( augassign testlist |
                      ('=' testlist)*);//连等 加等/减等/...
-augassign: ('+=' | '-=' | '*=' | '@=' | '/=' | '%=' | '&=' | '|=' | '^=' |
-            '<<=' | '>>=' | '**=' | '//=');
+augassign: ('+=' | '-=' | '*=' | '/=' );
 flow_stmt: break_stmt | continue_stmt | return_stmt;
 break_stmt: 'break';
 continue_stmt: 'continue';
@@ -127,22 +126,17 @@ return_stmt: 'return' (testlist)?;
 compound_stmt: if_stmt | while_stmt | for_stmt | funcdef ;
 if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ('else' ':' suite)?;
 while_stmt: 'while' test ':' suite;
-for_stmt: 'for' namelist 'in' testlist ':' suite ('else' ':' suite)?;
+for_stmt: 'for' namelist 'in' testlist ':' suite ;
 suite: simple_stmt | NEWLINE INDENT stmt+ DEDENT;
-test: or_test ('if' or_test 'else' test)? ;//后面那个括号不管
+test: or_test ;
 or_test: and_test ('or' and_test)*;
 and_test: not_test ('and' not_test)*;
 not_test: 'not' not_test | comparison;
-comparison: expr (comp_op expr)*;
-comp_op: '<'|'>'|'=='|'>='|'<='|'<>'|'!='|'in'|'not' 'in';//in 和 not in 和 <>不用处理
-expr: xor_expr ('|' xor_expr)*;
-xor_expr: and_expr ('^' and_expr)*;
-and_expr: shift_expr ('&' shift_expr)*;
-shift_expr: arith_expr (('<<'|'>>') arith_expr)*;
+comparison: arith_expr (comp_op arith_expr)*;
+comp_op: '<'|'>'|'=='|'>='|'<=';
 arith_expr: term (('+'|'-') term)*;
-term: factor (('*'|'@'|'/'|'%'|'//') factor)*;
-factor: ('+'|'-'|'~') factor | power;
-power: atom_expr ('**' factor)?;
+term: factor (('*'|'/') factor)*;
+factor: ('+'|'-') factor | atom_expr;
 atom_expr: atom trailer*;
 trailer: '(' (arglist)? ')' ;
 atom: (NAME | NUMBER | STRING+| 'None' | 'True' | 'False');

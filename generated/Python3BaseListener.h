@@ -91,18 +91,6 @@ public:
   virtual void enterComp_op(Python3Parser::Comp_opContext * /*ctx*/) override { }
   virtual void exitComp_op(Python3Parser::Comp_opContext * /*ctx*/) override { }
 
-  virtual void enterExpr(Python3Parser::ExprContext * /*ctx*/) override { }
-  virtual void exitExpr(Python3Parser::ExprContext * /*ctx*/) override { }
-
-  virtual void enterXor_expr(Python3Parser::Xor_exprContext * /*ctx*/) override { }
-  virtual void exitXor_expr(Python3Parser::Xor_exprContext * /*ctx*/) override { }
-
-  virtual void enterAnd_expr(Python3Parser::And_exprContext * /*ctx*/) override { }
-  virtual void exitAnd_expr(Python3Parser::And_exprContext * /*ctx*/) override { }
-
-  virtual void enterShift_expr(Python3Parser::Shift_exprContext * /*ctx*/) override { }
-  virtual void exitShift_expr(Python3Parser::Shift_exprContext * /*ctx*/) override { }
-
   virtual void enterArith_expr(Python3Parser::Arith_exprContext * /*ctx*/) override { }
   virtual void exitArith_expr(Python3Parser::Arith_exprContext * /*ctx*/) override { }
 
@@ -111,9 +99,6 @@ public:
 
   virtual void enterFactor(Python3Parser::FactorContext * /*ctx*/) override { }
   virtual void exitFactor(Python3Parser::FactorContext * /*ctx*/) override { }
-
-  virtual void enterPower(Python3Parser::PowerContext * /*ctx*/) override { }
-  virtual void exitPower(Python3Parser::PowerContext * /*ctx*/) override { }
 
   virtual void enterAtom_expr(Python3Parser::Atom_exprContext * /*ctx*/) override { }
   virtual void exitAtom_expr(Python3Parser::Atom_exprContext * /*ctx*/) override { }

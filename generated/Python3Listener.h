@@ -89,18 +89,6 @@ public:
   virtual void enterComp_op(Python3Parser::Comp_opContext *ctx) = 0;
   virtual void exitComp_op(Python3Parser::Comp_opContext *ctx) = 0;
 
-  virtual void enterExpr(Python3Parser::ExprContext *ctx) = 0;
-  virtual void exitExpr(Python3Parser::ExprContext *ctx) = 0;
-
-  virtual void enterXor_expr(Python3Parser::Xor_exprContext *ctx) = 0;
-  virtual void exitXor_expr(Python3Parser::Xor_exprContext *ctx) = 0;
-
-  virtual void enterAnd_expr(Python3Parser::And_exprContext *ctx) = 0;
-  virtual void exitAnd_expr(Python3Parser::And_exprContext *ctx) = 0;
-
-  virtual void enterShift_expr(Python3Parser::Shift_exprContext *ctx) = 0;
-  virtual void exitShift_expr(Python3Parser::Shift_exprContext *ctx) = 0;
-
   virtual void enterArith_expr(Python3Parser::Arith_exprContext *ctx) = 0;
   virtual void exitArith_expr(Python3Parser::Arith_exprContext *ctx) = 0;
 
@@ -109,9 +97,6 @@ public:
 
   virtual void enterFactor(Python3Parser::FactorContext *ctx) = 0;
   virtual void exitFactor(Python3Parser::FactorContext *ctx) = 0;
-
-  virtual void enterPower(Python3Parser::PowerContext *ctx) = 0;
-  virtual void exitPower(Python3Parser::PowerContext *ctx) = 0;
 
   virtual void enterAtom_expr(Python3Parser::Atom_exprContext *ctx) = 0;
   virtual void exitAtom_expr(Python3Parser::Atom_exprContext *ctx) = 0;

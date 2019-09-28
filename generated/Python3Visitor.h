@@ -69,21 +69,11 @@ public:
 
     virtual antlrcpp::Any visitComp_op(Python3Parser::Comp_opContext *context) = 0;
 
-    virtual antlrcpp::Any visitExpr(Python3Parser::ExprContext *context) = 0;
-
-    virtual antlrcpp::Any visitXor_expr(Python3Parser::Xor_exprContext *context) = 0;
-
-    virtual antlrcpp::Any visitAnd_expr(Python3Parser::And_exprContext *context) = 0;
-
-    virtual antlrcpp::Any visitShift_expr(Python3Parser::Shift_exprContext *context) = 0;
-
     virtual antlrcpp::Any visitArith_expr(Python3Parser::Arith_exprContext *context) = 0;
 
     virtual antlrcpp::Any visitTerm(Python3Parser::TermContext *context) = 0;
 
     virtual antlrcpp::Any visitFactor(Python3Parser::FactorContext *context) = 0;
-
-    virtual antlrcpp::Any visitPower(Python3Parser::PowerContext *context) = 0;
 
     virtual antlrcpp::Any visitAtom_expr(Python3Parser::Atom_exprContext *context) = 0;
 

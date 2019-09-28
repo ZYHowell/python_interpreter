@@ -111,7 +111,8 @@ void Python3Lexer::NEWLINEAction(antlr4::RuleContext *context, size_t actionInde
             }
           }
         break;
-        
+
+
   }
 }
 

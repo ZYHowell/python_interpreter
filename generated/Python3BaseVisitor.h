@@ -115,22 +115,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitExpr(Python3Parser::ExprContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitXor_expr(Python3Parser::Xor_exprContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitAnd_expr(Python3Parser::And_exprContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitShift_expr(Python3Parser::Shift_exprContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitArith_expr(Python3Parser::Arith_exprContext *ctx) override {
     return visitChildren(ctx);
   }
@@ -140,10 +124,6 @@ public:
   }
 
   virtual antlrcpp::Any visitFactor(Python3Parser::FactorContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitPower(Python3Parser::PowerContext *ctx) override {
     return visitChildren(ctx);
   }
 

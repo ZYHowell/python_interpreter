@@ -101,12 +101,9 @@ public:
         return tests;
     }
     antlrcpp::Any visitTest(Python3Parser::TestContext *ctx) override {
-        if (ctx->test() == nullptr) {
-            return visit(ctx->or_test(0));
-        } else{
-            std::cout<<"unsupported"<<std::endl;
-            return Any();
-        }
+       
+        return visit(ctx->or_test());
+        
     }
     antlrcpp::Any visitOr_test(Python3Parser::Or_testContext *ctx) override {
         if (ctx->and_test().size() == 1) {
@@ -134,46 +131,13 @@ public:
      * @return Any
      */
     antlrcpp::Any visitComparison(Python3Parser::ComparisonContext *ctx) override {
-        Any result=visit(ctx->expr(0));
-        for (int i = 0; i < ctx->expr().size(); i++) {
+        Any result=visit(ctx->arith_expr(0));
+        for (int i = 0; i < ctx->arith_expr().size(); i++) {
             //todo:deal with comparison
         }
         return result;
     }
-    antlrcpp::Any visitExpr(Python3Parser::ExprContext *ctx) override {
-        auto result=visit(ctx->xor_expr(0));
-        if (ctx->xor_expr().size() > 1) {
-            for (int i = 1; i < ctx->xor_expr().size(); i++) {
-                result.as<int>()|=visit(ctx->xor_expr(i)).as<int>();
-            }
-        }
-        return result;
-    }
-    antlrcpp::Any visitXor_expr(Python3Parser::Xor_exprContext *ctx) override {
-        auto result=visit(ctx->and_expr(0));
-        if (ctx->and_expr().size() > 1) {
-            for (int i = 1; i < ctx->and_expr().size(); i++) {
-                result.as<int>()^=visit(ctx->and_expr(i)).as<int>();
-            }
-        }
-        return result;
-    }
-    antlrcpp::Any visitAnd_expr(Python3Parser::And_exprContext *ctx) override {
-        auto result=visit(ctx->shift_expr(0));
-        if (ctx->shift_expr().size() > 1) {
-            for (int i = 1; i < ctx->shift_expr().size(); i++) {
-                result.as<int>()&=visit(ctx->shift_expr(i)).as<int>();
-            }
-        }
-        return result;
-    }
-    antlrcpp::Any visitShift_expr(Python3Parser::Shift_exprContext *ctx) override {
-        auto result=visit(ctx->arith_expr(0));
-        if (ctx->arith_expr().size() > 1) {
-            //todo:
-        }
-        return result;
-    }
+    
     antlrcpp::Any visitArith_expr(Python3Parser::Arith_exprContext *ctx) override {
         auto result=visit(ctx->term(0));
         if (ctx->term().size() > 1) {
@@ -189,7 +153,7 @@ public:
         return result;
     }
     antlrcpp::Any visitFactor(Python3Parser::FactorContext *ctx) override {
-        if (ctx->power() == nullptr) {
+        if (ctx->atom_expr() == nullptr) {
             if (ctx->ADD() != nullptr) {
                 return visit(ctx->factor());
             } else if (ctx->MINUS() != nullptr) {
@@ -201,21 +165,12 @@ public:
                 } else{
                     std::cout<<"unsupported"<<std::endl;
                 }
-            } else if (ctx->NOT_OP() != nullptr) {
-                return ~visit(ctx->factor()).as<int>();
             }
         } else{
-            return visit(ctx->power());
+            return visit(ctx->atom_expr());
         }
     }
-    antlrcpp::Any visitPower(Python3Parser::PowerContext *ctx) override {
-        auto result=visit(ctx->atom_expr());
-        if (ctx->factor() != nullptr) {
-            int factor=visit(ctx->factor());
-            result.as<int>()=pow(result.as<int>(),factor);
-        }
-        return result;
-    }
+
     antlrcpp::Any visitAtom_expr(Python3Parser::Atom_exprContext *ctx) override {
         if (ctx->atom()->NAME() && ctx->atom()->NAME()->toString()=="print") {
             auto tmp=visit(ctx->trailer(0)).as<std::shared_ptr<std::vector<Any>>>();//tostring是打印出结构
@@ -240,6 +195,9 @@ public:
     }
     antlrcpp::Any visitAtom(Python3Parser::AtomContext *ctx) override {
         if (ctx->NUMBER() != nullptr) {
+            if (ctx->NUMBER()->toString().find('.') != std::string::npos) {
+                return std::atof(ctx->NUMBER()->toString().c_str());
+            }
             return std::atoi(ctx->NUMBER()->toString().c_str());
         } else if (ctx->NAME() != nullptr) {
             return ctx->NAME()->toString();//todo:wrong
