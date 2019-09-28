@@ -131,7 +131,7 @@ return_stmt: 'return' (testlist)?;
 compound_stmt: if_stmt | while_stmt | for_stmt | funcdef ;
 if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ('else' ':' suite)?;
 while_stmt: 'while' test ':' suite;
-for_stmt: 'for' exprlist 'in' testlist ':' suite ('else' ':' suite)?;
+for_stmt: 'for' namelist 'in' testlist ':' suite ('else' ':' suite)?;
 suite: simple_stmt | NEWLINE INDENT stmt+ DEDENT;
 test: or_test ('if' or_test 'else' test)? ;
 or_test: and_test ('or' and_test)*;
@@ -148,7 +148,7 @@ term: factor (('*'|'@'|'/'|'%'|'//') factor)*;
 factor: ('+'|'-'|'~') factor | power;
 power: atom ('**' factor)?;
 atom: (NAME | NUMBER | STRING+| 'None' | 'True' | 'False');
-exprlist: (expr) (',' (expr))* (',')?;
+namelist: (NAME) (',' (NAME))* (',')?;
 testlist: test (',' test)* (',')?;//算式  eg： a,b   a   a+b
 STRING
  : STRING_LITERAL
