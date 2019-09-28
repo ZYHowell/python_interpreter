@@ -5,7 +5,7 @@
 #include "antlr4-runtime.h"
 #include "Python3Lexer.h"
 #include "Python3Parser.h"
-
+#include "Evalvisitor.h"
 using namespace antlr4;
 int main(int argc, const char* argv[]){
     const std::string filepath="../test_file/new.py";
@@ -18,15 +18,13 @@ int main(int argc, const char* argv[]){
     Python3Lexer lexer(&input);
     CommonTokenStream tokens(&lexer);
     tokens.fill();
-    for (auto token : tokens.getTokens()) {
-        std::cout << token->toString() << std::endl;
-    }
-    
     Python3Parser parser(&tokens);
     tree::ParseTree* tree=parser.file_input();
-    std::cout << tree->toStringTree(&parser) << std::endl;
+    EvalVisitor visitor;
+    visitor.visit(tree);
     
 
     ifs.close();
-    
+//    antlrcpp::Any tmp=1;
+//    std::cout<<tmp.is<double>();
 }

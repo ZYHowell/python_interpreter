@@ -156,8 +156,6 @@ public:
     virtual size_t getRuleIndex() const override;
     std::vector<TfpdefContext *> tfpdef();
     TfpdefContext* tfpdef(size_t i);
-    antlr4::tree::TerminalNode *STAR();
-    antlr4::tree::TerminalNode *POWER();
     std::vector<antlr4::tree::TerminalNode *> ASSIGN();
     antlr4::tree::TerminalNode* ASSIGN(size_t i);
     std::vector<TestContext *> test();
@@ -179,8 +177,6 @@ public:
     TfpdefContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     antlr4::tree::TerminalNode *NAME();
-    antlr4::tree::TerminalNode *COLON();
-    TestContext *test();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
