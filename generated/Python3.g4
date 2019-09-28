@@ -146,10 +146,15 @@ shift_expr: arith_expr (('<<'|'>>') arith_expr)*;
 arith_expr: term (('+'|'-') term)*;
 term: factor (('*'|'@'|'/'|'%'|'//') factor)*;
 factor: ('+'|'-'|'~') factor | power;
-power: atom ('**' factor)?;
+power: atom_expr ('**' factor)?;
+atom_expr: atom trailer*;
+trailer: '(' (arglist)? ')' ;
 atom: (NAME | NUMBER | STRING+| 'None' | 'True' | 'False');
 namelist: (NAME) (',' (NAME))* (',')?;
 testlist: test (',' test)* (',')?;//算式  eg： a,b   a   a+b
+arglist: argument (',' argument)*  (',')?;
+argument: ( test |
+            test '=' test );
 STRING
  : STRING_LITERAL
  | BYTES_LITERAL

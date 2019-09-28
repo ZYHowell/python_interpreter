@@ -113,14 +113,26 @@ public:
   virtual void enterPower(Python3Parser::PowerContext *ctx) = 0;
   virtual void exitPower(Python3Parser::PowerContext *ctx) = 0;
 
+  virtual void enterAtom_expr(Python3Parser::Atom_exprContext *ctx) = 0;
+  virtual void exitAtom_expr(Python3Parser::Atom_exprContext *ctx) = 0;
+
+  virtual void enterTrailer(Python3Parser::TrailerContext *ctx) = 0;
+  virtual void exitTrailer(Python3Parser::TrailerContext *ctx) = 0;
+
   virtual void enterAtom(Python3Parser::AtomContext *ctx) = 0;
   virtual void exitAtom(Python3Parser::AtomContext *ctx) = 0;
 
-  virtual void enterExprlist(Python3Parser::ExprlistContext *ctx) = 0;
-  virtual void exitExprlist(Python3Parser::ExprlistContext *ctx) = 0;
+  virtual void enterNamelist(Python3Parser::NamelistContext *ctx) = 0;
+  virtual void exitNamelist(Python3Parser::NamelistContext *ctx) = 0;
 
   virtual void enterTestlist(Python3Parser::TestlistContext *ctx) = 0;
   virtual void exitTestlist(Python3Parser::TestlistContext *ctx) = 0;
+
+  virtual void enterArglist(Python3Parser::ArglistContext *ctx) = 0;
+  virtual void exitArglist(Python3Parser::ArglistContext *ctx) = 0;
+
+  virtual void enterArgument(Python3Parser::ArgumentContext *ctx) = 0;
+  virtual void exitArgument(Python3Parser::ArgumentContext *ctx) = 0;
 
 
 };

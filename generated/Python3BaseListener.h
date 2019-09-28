@@ -115,14 +115,26 @@ public:
   virtual void enterPower(Python3Parser::PowerContext * /*ctx*/) override { }
   virtual void exitPower(Python3Parser::PowerContext * /*ctx*/) override { }
 
+  virtual void enterAtom_expr(Python3Parser::Atom_exprContext * /*ctx*/) override { }
+  virtual void exitAtom_expr(Python3Parser::Atom_exprContext * /*ctx*/) override { }
+
+  virtual void enterTrailer(Python3Parser::TrailerContext * /*ctx*/) override { }
+  virtual void exitTrailer(Python3Parser::TrailerContext * /*ctx*/) override { }
+
   virtual void enterAtom(Python3Parser::AtomContext * /*ctx*/) override { }
   virtual void exitAtom(Python3Parser::AtomContext * /*ctx*/) override { }
 
-  virtual void enterExprlist(Python3Parser::ExprlistContext * /*ctx*/) override { }
-  virtual void exitExprlist(Python3Parser::ExprlistContext * /*ctx*/) override { }
+  virtual void enterNamelist(Python3Parser::NamelistContext * /*ctx*/) override { }
+  virtual void exitNamelist(Python3Parser::NamelistContext * /*ctx*/) override { }
 
   virtual void enterTestlist(Python3Parser::TestlistContext * /*ctx*/) override { }
   virtual void exitTestlist(Python3Parser::TestlistContext * /*ctx*/) override { }
+
+  virtual void enterArglist(Python3Parser::ArglistContext * /*ctx*/) override { }
+  virtual void exitArglist(Python3Parser::ArglistContext * /*ctx*/) override { }
+
+  virtual void enterArgument(Python3Parser::ArgumentContext * /*ctx*/) override { }
+  virtual void exitArgument(Python3Parser::ArgumentContext * /*ctx*/) override { }
 
 
   virtual void enterEveryRule(antlr4::ParserRuleContext * /*ctx*/) override { }
