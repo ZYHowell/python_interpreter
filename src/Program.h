@@ -5,13 +5,15 @@
 #ifndef PYTHON_INTERPRETER_PROGRAM_H
 #define PYTHON_INTERPRETER_PROGRAM_H
 
-#include <unordered_map>
+#include <map>
+#include <stack>
 #include "antlr4-runtime.h"
 
 struct Frame {
-    std::unordered_map<std::string,antlrcpp::Any> memory;
+    std::map<std::string,antlrcpp::Any> memory;
     antlr4::tree::ParseTree* returnnode;
 };
+
 struct Function {
     antlr4::tree::ParseTree* suite;
     std::vector<std::string> params;///暂时不支持默认参数
@@ -19,12 +21,16 @@ public:
     Function(antlr4::tree::ParseTree* tree,const std::vector<std::string>&params):suite(tree),params(params){}
     
 };
+
 class Program {
+    using Any = antlrcpp::Any;
 public:
     std::stack<Frame> frames;
-    std::unordered_map<std::string,Function> funcs;
+    std::map<std::string,Function> funcs;
 public:
-
+    std::stack<Frame> tmp_frames;
+    Any getValue(std::string name);
+    bool setValue(std::string name, const Any &value);
 };
 
 
