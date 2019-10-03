@@ -1,37 +1,51 @@
-//
-// Created by jinho on 9/28/2019.
-//
-
 #ifndef PYTHON_INTERPRETER_PROGRAM_H
 #define PYTHON_INTERPRETER_PROGRAM_H
 
 #include <map>
 #include <stack>
+#include <memory>
+#include "exceptions.h"
 #include "antlr4-runtime.h"
 
-struct Frame {
-    std::map<std::string,antlrcpp::Any> memory;
+struct Frame 
+{
+    std::map<std::string,antlrcpp::Any> *memory;
     antlr4::tree::ParseTree* returnnode;
+    Frame():
+    {
+        memory = new std::map<std::string, antlrcpp::Any>;
+    }
+    ~Frame()
+    {
+        delete memory;
+    }
 };
 
-struct Function {
+struct Function 
+{
     antlr4::tree::ParseTree* suite;
-    std::vector<std::string> params;///暂时不支持默认参数
+    std::shared_ptr<std::vector<std::string>> params;///暂时不支持默认参数
 public:
-    Function(antlr4::tree::ParseTree* tree,const std::vector<std::string>&params):suite(tree),params(params){}
-    
+    Function(antlr4::tree::ParseTree* tree, 
+             const std::shared_ptr<std::vector<std::string>> &params)
+             :suite(tree),params(params){}
 };
 
-class Program {
+class Program 
+{
     using Any = antlrcpp::Any;
+    std::stack<Frame> tmp_frames;
 public:
     std::stack<Frame> frames;
     std::map<std::string,Function> funcs;
 public:
-    std::stack<Frame> tmp_frames;
-    Any getValue(std::string name);
-    bool setValue(std::string name, const Any &value);
+    Any *getValue(std::string name);
 };
+
+class ERRORS 
+{
+    
+}
 
 
 #endif //PYTHON_INTERPRETER_PROGRAM_H

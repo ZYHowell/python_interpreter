@@ -1,7 +1,3 @@
-//
-// Created by jinho on 9/28/2019.
-//
-
 #ifndef PYTHON_INTERPRETER_EVALVISITOR_H
 #define PYTHON_INTERPRETER_EVALVISITOR_H
 
@@ -10,7 +6,7 @@
 #include "Program.h"
 class EvalVisitor: public Python3BaseVisitor {
 private:
-    using antlrcpp::Any = Any;
+    using Any = antlrcpp::Any;
     Program program;
 public:
     virtual antlrcpp::Any visitFile_input(Python3Parser::File_inputContext *ctx);
@@ -48,6 +44,7 @@ public:
     virtual antlrcpp::Any visitTestlist(Python3Parser::TestlistContext *ctx);
     virtual antlrcpp::Any visitArglist(Python3Parser::ArglistContext *ctx);
     virtual antlrcpp::Any visitArgument(Python3Parser::ArgumentContext *ctx);
+    bool AreNames(antlrcpp::Any list);
 };
 
 
