@@ -1,11 +1,11 @@
 
-// Generated from .\Python3.g4 by ANTLR 4.7.2
+// Generated from Python3.g4 by ANTLR 4.7.2
 
 #pragma once
 
 
 #include "antlr4-runtime.h"
-#include "Python3Parser.h"
+
 
 
 

@@ -1,5 +1,5 @@
 
-// Generated from .\Python3.g4 by ANTLR 4.7.2
+// Generated from Python3.g4 by ANTLR 4.7.2
 
 #pragma once
 
@@ -80,10 +80,6 @@ public:
   }
 
   virtual antlrcpp::Any visitWhile_stmt(Python3Parser::While_stmtContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
-  virtual antlrcpp::Any visitFor_stmt(Python3Parser::For_stmtContext *ctx) override {
     return visitChildren(ctx);
   }
 

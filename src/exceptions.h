@@ -37,11 +37,19 @@ namespace sjtu
     public:
         int type;
         //1 for break, 2 for continue and 3 for return
-        Any retValue;
-        flowRet(int tp = 0;Any ret = Any()): type(tp), retValeu(ret){}
+        antlrcpp::Any retValue;
+        flowRet(int tp = 0, Any ret = Any()): type(tp), retValeu(ret){}
         ~flowRet() {}
     }
     class none_t{}
+    struct funcArg
+    {
+        std::string name;
+        antlrcpp::Any value;
+        bool type;
+        funcArg(antlrcpp::Any &val, bool tp = 0, std::string n = ""):
+            value(val), type(tp), name(n) {}
+    }
 }
 
 #endif

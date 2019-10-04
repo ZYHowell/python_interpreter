@@ -252,8 +252,6 @@ virtual antlrcpp::Any EvalVisitor::visitCompound_stmt(Python3Parser::Compound_st
         return visit(ctx->if_stmt());
     } else if (ctx->while_stmt() != nullptr) {
         return visit(ctx->while_stmt());
-    } else if (ctx->for_stmt() != nullptr) {
-        return visit(ctx->for_stmt());
     } else {
         return visit(ctx->funcdef());
     }
@@ -290,11 +288,6 @@ virtual antlrcpp::Any EvalVisitor::visitWhile_stmt(Python3Parser::While_stmtCont
     }
     return sjtu::none_t();
 }
-
-// virtual antlrcpp::Any EvalVisitor::visitFor_stmt(Python3Parser::For_stmtContext *ctx) 
-// {
-    
-// }
 
 virtual antlrcpp::Any EvalVisitor::visitSuite(Python3Parser::SuiteContext *ctx) 
 {
@@ -518,7 +511,7 @@ virtual antlrcpp::Any EvalVisitor::visitFactor(Python3Parser::FactorContext *ctx
 
 virtual antlrcpp::Any EvalVisitor::visitAtom_expr(Python3Parser::Atom_exprContext *ctx) 
 {
-    if (ctx->trailer().size()) {
+    if (ctx->trailer() != nullptr) {
         if (program.checkIsName) {
             //err
         }
@@ -540,6 +533,7 @@ virtual antlrcpp::Any EvalVisitor::visitAtom_expr(Python3Parser::Atom_exprContex
             size_t num = func.params.size();
             for (size_t i = 0;i < num;++i) {
                 (*mem)[func.params[i]] = paraNum[i];
+                //needs to be improved
             }
             
             auto ret = visit(func.suite);
@@ -614,10 +608,26 @@ virtual antlrcpp::Any EvalVisitor::visitTestlist(Python3Parser::TestlistContext 
 
 virtual antlrcpp::Any EvalVisitor::visitArglist(Python3Parser::ArglistContext *ctx) 
 {
-    
+    auto args = ctx->arguemnt();
+    size_t i = 0;
+    bool isPositional = false;
+    std::vector<Any> ret(args.size());
+    for (auto arg : args) {
+        ret[i] = visit(arg);
+        if (ret[i].as<sjtu::funcArg>().type) isPositional = true;
+        else if (isPositional) {
+            //err
+        }
+        ++i;
+    }
 }
 
 virtual antlrcpp::Any EvalVisitor::visitArgument(Python3Parser::ArgumentContext *ctx) 
 {
-    
+    auto tests = ctx->test();
+    if (tests.size() == 1) {
+        return sjtu::funcArg(visit(test[0]));
+    } else {
+        return sjtu::funcArg(visit(test[1]), 1, visit(test[0]));
+    }
 }

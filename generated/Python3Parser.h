@@ -1,5 +1,5 @@
 
-// Generated from .\Python3.g4 by ANTLR 4.7.2
+// Generated from Python3.g4 by ANTLR 4.7.2
 
 #pragma once
 
@@ -35,11 +35,11 @@ public:
     RuleTfpdef = 4, RuleStmt = 5, RuleSimple_stmt = 6, RuleSmall_stmt = 7, 
     RuleExpr_stmt = 8, RuleAugassign = 9, RuleFlow_stmt = 10, RuleBreak_stmt = 11, 
     RuleContinue_stmt = 12, RuleReturn_stmt = 13, RuleCompound_stmt = 14, 
-    RuleIf_stmt = 15, RuleWhile_stmt = 16, RuleFor_stmt = 17, RuleSuite = 18, 
-    RuleTest = 19, RuleOr_test = 20, RuleAnd_test = 21, RuleNot_test = 22, 
-    RuleComparison = 23, RuleComp_op = 24, RuleArith_expr = 25, RuleTerm = 26, 
-    RuleFactor = 27, RuleAtom_expr = 28, RuleTrailer = 29, RuleAtom = 30, 
-    RuleNamelist = 31, RuleTestlist = 32, RuleArglist = 33, RuleArgument = 34
+    RuleIf_stmt = 15, RuleWhile_stmt = 16, RuleSuite = 17, RuleTest = 18, 
+    RuleOr_test = 19, RuleAnd_test = 20, RuleNot_test = 21, RuleComparison = 22, 
+    RuleComp_op = 23, RuleArith_expr = 24, RuleTerm = 25, RuleFactor = 26, 
+    RuleAtom_expr = 27, RuleTrailer = 28, RuleAtom = 29, RuleNamelist = 30, 
+    RuleTestlist = 31, RuleArglist = 32, RuleArgument = 33
   };
 
   Python3Parser(antlr4::TokenStream *input);
@@ -69,7 +69,6 @@ public:
   class Compound_stmtContext;
   class If_stmtContext;
   class While_stmtContext;
-  class For_stmtContext;
   class SuiteContext;
   class TestContext;
   class Or_testContext;
@@ -334,7 +333,6 @@ public:
     virtual size_t getRuleIndex() const override;
     If_stmtContext *if_stmt();
     While_stmtContext *while_stmt();
-    For_stmtContext *for_stmt();
     FuncdefContext *funcdef();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -387,26 +385,6 @@ public:
   };
 
   While_stmtContext* while_stmt();
-
-  class  For_stmtContext : public antlr4::ParserRuleContext {
-  public:
-    For_stmtContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    antlr4::tree::TerminalNode *FOR();
-    NamelistContext *namelist();
-    antlr4::tree::TerminalNode *IN();
-    TestlistContext *testlist();
-    antlr4::tree::TerminalNode *COLON();
-    SuiteContext *suite();
-
-    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
-    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  For_stmtContext* for_stmt();
 
   class  SuiteContext : public antlr4::ParserRuleContext {
   public:
@@ -596,8 +574,7 @@ public:
     Atom_exprContext(antlr4::ParserRuleContext *parent, size_t invokingState);
     virtual size_t getRuleIndex() const override;
     AtomContext *atom();
-    std::vector<TrailerContext *> trailer();
-    TrailerContext* trailer(size_t i);
+    TrailerContext *trailer();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;

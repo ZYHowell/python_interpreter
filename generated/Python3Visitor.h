@@ -1,5 +1,5 @@
 
-// Generated from .\Python3.g4 by ANTLR 4.7.2
+// Generated from Python3.g4 by ANTLR 4.7.2
 
 #pragma once
 
@@ -52,8 +52,6 @@ public:
     virtual antlrcpp::Any visitIf_stmt(Python3Parser::If_stmtContext *context) = 0;
 
     virtual antlrcpp::Any visitWhile_stmt(Python3Parser::While_stmtContext *context) = 0;
-
-    virtual antlrcpp::Any visitFor_stmt(Python3Parser::For_stmtContext *context) = 0;
 
     virtual antlrcpp::Any visitSuite(Python3Parser::SuiteContext *context) = 0;
 

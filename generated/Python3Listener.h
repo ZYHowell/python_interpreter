@@ -1,5 +1,5 @@
 
-// Generated from .\Python3.g4 by ANTLR 4.7.2
+// Generated from Python3.g4 by ANTLR 4.7.2
 
 #pragma once
 
@@ -64,9 +64,6 @@ public:
 
   virtual void enterWhile_stmt(Python3Parser::While_stmtContext *ctx) = 0;
   virtual void exitWhile_stmt(Python3Parser::While_stmtContext *ctx) = 0;
-
-  virtual void enterFor_stmt(Python3Parser::For_stmtContext *ctx) = 0;
-  virtual void exitFor_stmt(Python3Parser::For_stmtContext *ctx) = 0;
 
   virtual void enterSuite(Python3Parser::SuiteContext *ctx) = 0;
   virtual void exitSuite(Python3Parser::SuiteContext *ctx) = 0;

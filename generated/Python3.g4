@@ -117,16 +117,15 @@ stmt: simple_stmt | compound_stmt;
 simple_stmt: small_stmt  NEWLINE;
 small_stmt: expr_stmt | flow_stmt;
 expr_stmt: testlist ( augassign testlist |
-                     ('=' testlist)*);//è¿ç­‰ åŠ ç­‰/å‡ç­‰/...
+                     ('=' testlist)*);//Á¬µÈ ¼ÓµÈ/¼õµÈ/...
 augassign: ('+=' | '-=' | '*=' | '/=' );
 flow_stmt: break_stmt | continue_stmt | return_stmt;
 break_stmt: 'break';
 continue_stmt: 'continue';
 return_stmt: 'return' (testlist)?;
-compound_stmt: if_stmt | while_stmt | for_stmt | funcdef ;
+compound_stmt: if_stmt | while_stmt | funcdef ;
 if_stmt: 'if' test ':' suite ('elif' test ':' suite)* ('else' ':' suite)?;
 while_stmt: 'while' test ':' suite;
-for_stmt: 'for' namelist 'in' testlist ':' suite ;
 suite: simple_stmt | NEWLINE INDENT stmt+ DEDENT;
 test: or_test ;
 or_test: and_test ('or' and_test)*;
@@ -137,11 +136,11 @@ comp_op: '<'|'>'|'=='|'>='|'<=';
 arith_expr: term (('+'|'-') term)*;
 term: factor (('*'|'/') factor)*;
 factor: ('+'|'-') factor | atom_expr;
-atom_expr: atom trailer*;
+atom_expr: atom trailer?;
 trailer: '(' (arglist)? ')' ;
 atom: (NAME | NUMBER | STRING+| 'None' | 'True' | 'False');
 namelist: (NAME) (',' (NAME))* (',')?;
-testlist: test (',' test)* (',')?;//ç®—å¼  egï¼š a,b   a   a+b
+testlist: test (',' test)* (',')?;//ËãÊ½  eg£º a,b   a   a+b
 arglist: argument (',' argument)*  (',')?;
 argument: ( test |
             test '=' test );
