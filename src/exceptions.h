@@ -41,6 +41,7 @@ namespace sjtu
         flowRet(int tp = 0;Any ret = Any()): type(tp), retValeu(ret){}
         ~flowRet() {}
     }
+    class none_t{}
 }
 
 #endif

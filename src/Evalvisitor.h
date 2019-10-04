@@ -45,17 +45,19 @@ public:
     virtual antlrcpp::Any visitTestlist(Python3Parser::TestlistContext *ctx);
     virtual antlrcpp::Any visitArglist(Python3Parser::ArglistContext *ctx);
     virtual antlrcpp::Any visitArgument(Python3Parser::ArgumentContext *ctx);
-    inline size_t AreNames(antlrcpp::Any list);
-    inline bool IsName(antlrcpp::Any &ele);
+    inline size_t AreNames(Any list);
+    inline bool IsName(Any &ele);
     inline size_t getNodeIndex(antlr4::tree::TerminalNode* it);
-    inline bool isList(antlrcpp::Any &it);
-    inline int toInt(antlrcpp::Any &it);
+    inline bool isList(Any &it);
+    inline int toInt(Any &it);
     inline void checkType(Any &a, Any &b);
     inline bool lessThan(Any &a, Any &b);
     inline bool greaterThan(Any &a, Any &b);
     inline bool equals(Any &a, Any &b);
     inline bool gtEq(Any &a, Any &b);
     inline bool lsEq(Any &a, Any &b);
+    inline bool toBool(Any &it);
+    inline antlrcpp::Any judgeSuite(Any &it);
 };
 
 
