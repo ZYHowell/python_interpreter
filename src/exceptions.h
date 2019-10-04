@@ -4,10 +4,13 @@
 #include <cstddef>
 #include <cstring>
 #include <string>
+#include "antlr4-runtime.h"
 
-namespace sjtu {
+namespace sjtu 
+{
 
-    class exception {
+    class exception 
+    {
     protected:
         const std::string variant = "";
         std::string detail = "";
@@ -28,6 +31,16 @@ namespace sjtu {
 
     class container_is_empty : public exception {};
 
+    class flowRet 
+    {
+        using Any = antlrcpp::Any;
+    public:
+        int type;
+        //1 for break, 2 for continue and 3 for return
+        Any retValue;
+        flowRet(int tp = 0;Any ret = Any()): type(tp), retValeu(ret){}
+        ~flowRet() {}
+    }
 }
 
 #endif

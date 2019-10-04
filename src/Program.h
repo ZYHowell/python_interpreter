@@ -24,10 +24,11 @@ struct Frame
 struct Function 
 {
     antlr4::tree::ParseTree* suite;
-    std::shared_ptr<std::vector<std::string>> params;///暂时不支持默认参数
+    //really a parseTree? or a SuiteContext?
+    std::vector<std::string> params;///暂时不支持默认参数
 public:
     Function(antlr4::tree::ParseTree* tree, 
-             const std::shared_ptr<std::vector<std::string>> &params)
+             std::vector<std::string> &params)
              :suite(tree),params(params){}
 };
 
@@ -35,6 +36,7 @@ class Program
 {
     using Any = antlrcpp::Any;
     std::stack<Frame> tmp_frames;
+    bool checkIsName;
 public:
     std::stack<Frame> frames;
     std::map<std::string,Function> funcs;

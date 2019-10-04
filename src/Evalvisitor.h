@@ -4,6 +4,7 @@
 #include <cmath>
 #include "Python3BaseVisitor.h"
 #include "Program.h"
+#include "exceptions.h"
 class EvalVisitor: public Python3BaseVisitor {
 private:
     using Any = antlrcpp::Any;
@@ -44,7 +45,11 @@ public:
     virtual antlrcpp::Any visitTestlist(Python3Parser::TestlistContext *ctx);
     virtual antlrcpp::Any visitArglist(Python3Parser::ArglistContext *ctx);
     virtual antlrcpp::Any visitArgument(Python3Parser::ArgumentContext *ctx);
-    bool AreNames(antlrcpp::Any list);
+    inline size_t AreNames(antlrcpp::Any list);
+    inline bool IsName(antlrcpp::Any &ele);
+    inline size_t getNodeIndex(antlr4::tree::TerminalNode* it);
+    inline bool isList(antlrcpp::Any &it);
+    inline int EvalVisitor::toInt(antlrcpp::Any &it);
 };
 
 
