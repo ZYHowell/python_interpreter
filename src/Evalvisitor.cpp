@@ -41,6 +41,66 @@ inline int EvalVisitor::toInt(antlrcpp::Any &it)
 }
 
 
+inline void EvalVisitor::checkType(Any &a, Any &b)
+{
+    if (b.is<void *>) {
+        //err
+    }
+    if ((a.is<std::string> && !b.is<std::string>) ||
+         !a.is<std::string && b.is<std::string>>) {
+        //err
+    }
+    return;
+}
+
+
+inline bool EvalVisitor::lessThan(Any &a, Any &b)
+{
+    checkType(a, b);
+    if (a.is<std::string>) {
+        return a.as<std::string> < b.as<std::string>;
+    } else {
+        return toInt(a) < toInt(b);
+    }
+}
+inline bool EvalVisitor::greaterThan(Any &a, Any &b)
+{
+    checkType(a, b);
+    if (a.is<std::string>) {
+        return a.as<std::string> > b.as<std::string>;
+    } else {
+        return toInt(a) > toInt(b);
+    }
+}
+inline bool EvalVisitor::equals(Any &a, Any &b)
+{
+    checkType(a, b);
+    if (a.is<std::string>) {
+        return a.as<std::string> == b.as<std::string>;
+    } else {
+        return toInt(a) == toInt(b);
+    }
+}
+inline bool EvalVisitor::gtEq(Any &a, Any &b)
+{
+    checkType(a, b);
+    if (a.is<std::string>) {
+        return a.as<std::string> >= b.as<std::string>;
+    } else {
+        return toInt(a) >= toInt(b);
+    }
+}
+inline bool EvalVisitor::lsEq(Any &a, Any &b)
+{
+    checkType(a, b);
+    if (a.is<std::string>) {
+        return a.as<std::string> <= b.as<std::string>;
+    } else {
+        return toInt(a) <= toInt(b);
+    }
+}
+
+
 virtual antlrcpp::Any EvalVisitor::visitFile_input(Python3Parser::File_inputContext *ctx) 
 {
     for (auto current_stmt : ctx->stmt()) {
@@ -236,14 +296,15 @@ virtual antlrcpp::Any EvalVisitor::visitAnd_test(Python3Parser::And_testContext 
 virtual antlrcpp::Any EvalVisitor::visitNot_test(Python3Parser::Not_testContext *ctx) 
 {
     if (ctx->NOT() != nullptr){
-        return !visit(ctx->not_test());
-    } else {
         if (program.checkIsName) {
             //err
         }
+        return !visit(ctx->not_test());
+    } else {
         return visit(ctx->comparison());
     }
 }
+
 
 virtual antlrcpp::Any EvalVisitor::visitComparison(Python3Parser::ComparisonContext *ctx) 
 {
@@ -252,30 +313,32 @@ virtual antlrcpp::Any EvalVisitor::visitComparison(Python3Parser::ComparisonCont
     bool fir = 0;
     expre[0] = visit(ctx->arith_expr(num));
     auto comp_op = ctx->comp_op();
-    if (program.checkIsName && comp_op.size()) {
+    if (!comp_op.size())
+        return expre[0];
+    if (program.checkIsName || expre[0].is<void *>) {
         //err
     }
     for (auto op : comp_op){
         expre[!fir] = visit(ctx->arith_expr(++num));
         //since STRING type, the comparison may need to be improved
         if (op->LESS_THAN() != nullptr){
-            if (!expre[fir] < expre[!fir])
+            if lessThan(!expre[fir], expre[!fir])
                 return false;
         }
         else if (op->GREATER_THAN() != nullptr) {
-            if (!expre[fir] > expre[!fir])
+            if greaterThan(!expre[fir], expre[!fir])
                 return false;
         }
         else if (op->EQUALS() != nullptr) {
-            if (!expre[fir] == expre[!fir])
+            if equals(!expre[fir], expre[!fir])
                 return false;
         }
         else if (op->GT_EQ() != nullptr) {
-            if (!expre[fir] >= expre[!fir])
+            if gtEq(!expre[fir], expre[!fir])
                 return false;
         }
         else{
-            if (!expre[fir] <= expre[!fir])
+            if lsEq(!expre[fir], expre[!fir])
                 return false;
         }
         fir = !fir;
@@ -296,11 +359,29 @@ virtual antlrcpp::Any EvalVisitor::visitArith_expr(Python3Parser::Arith_exprCont
     Any nex;
     size_t num = visit(ctx->term().size());
     size_t addN = 0, minusN = 0, addMax = ctx->ADD().size(), minusMax = ctx->MINUS().size();
-    if (program.checkIsName && (addMax || minusMax)) {
+    
+    if (num == 1) {
+        return ret;
+    }
+    
+    if (program.checkIsName || ret.is<void *>()) {
         //err
     }
+    
+    if (ret.is<std::string>) {
+        if (minusMax) {
+            //err
+        }
+        std::string result = ret.as<std::string>();
+        for (size_t i = 1;i < num;++i) {
+            result = result + visit(ctx->term(i)).as<std::string>();
+        }
+        return result;
+    }
+    
+    int result = toInt(ret);
     for (size_t i = 1;i < num;++i) {
-        nex = visit(ctx->term(i));
+        nex = toInt(visit(ctx->term(i)));
         if (addN >= addMax) {
             ret -= nex;
             ++minusN;
@@ -320,15 +401,18 @@ virtual antlrcpp::Any EvalVisitor::visitArith_expr(Python3Parser::Arith_exprCont
 
 virtual antlrcpp::Any EvalVisitor::visitTerm(Python3Parser::TermContext *ctx) 
 {
-    //waiting to check validity
     auto ret = visit(ctx->term(0));
-    int nex;
-    int result = toInt(ret);
     size_t num = visit(ctx->term().size());
     size_t starN = 0, divN = 0, starMax = ctx->STAR().size(), divMax = ctx->DIV().size();
-    if (program.checkIsName && (starMax || divMax)) {
+    
+    if (num == 1) return ret;
+    
+    if (program.checkIsName) {
         //err
     }
+
+    int result = toInt(ret);
+    int nex;
     for (size_t i = 1;i < num;++i) {
         nex = toInt(visit(ctx->term(i)));
         if (starN >= starMax) {

@@ -49,7 +49,13 @@ public:
     inline bool IsName(antlrcpp::Any &ele);
     inline size_t getNodeIndex(antlr4::tree::TerminalNode* it);
     inline bool isList(antlrcpp::Any &it);
-    inline int EvalVisitor::toInt(antlrcpp::Any &it);
+    inline int toInt(antlrcpp::Any &it);
+    inline void checkType(Any &a, Any &b);
+    inline bool lessThan(Any &a, Any &b);
+    inline bool greaterThan(Any &a, Any &b);
+    inline bool equals(Any &a, Any &b);
+    inline bool gtEq(Any &a, Any &b);
+    inline bool lsEq(Any &a, Any &b);
 };
 
 
