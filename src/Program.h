@@ -11,7 +11,7 @@ struct Frame
 {
     std::map<std::string,antlrcpp::Any> *memory;
     antlr4::tree::ParseTree* returnnode;
-    Frame()
+    Frame():
     {
         memory = new std::map<std::string, antlrcpp::Any>;
     }
@@ -25,7 +25,7 @@ struct Function
 {
     antlr4::tree::ParseTree* suite;
     //really a parseTree? or a SuiteContext?
-    std::vector<std::string> params;///暂时不支持默认参数
+    std::vector<sjtu::funcArg> params;
 public:
     Function(antlr4::tree::ParseTree* tree, 
              std::vector<std::string> &params)
@@ -42,11 +42,6 @@ public:
     std::map<std::string,Function> funcs;
 public:
     Any *getValue(std::string name);
-};
-
-class ERRORS 
-{
-    
 };
 
 

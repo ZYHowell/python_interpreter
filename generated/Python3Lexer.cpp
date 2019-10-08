@@ -1,9 +1,9 @@
 
-// Generated from .\Python3.g4 by ANTLR 4.7.2
+// Generated from Python3.g4 by ANTLR 4.7.2
 
 
 #include "Python3Lexer.h"
-#include <regex>
+
 
 using namespace antlr4;
 
@@ -76,39 +76,44 @@ bool Python3Lexer::sempred(RuleContext *context, size_t ruleIndex, size_t predic
 
 void Python3Lexer::NEWLINEAction(antlr4::RuleContext *context, size_t actionIndex) {
   switch (actionIndex) {
-      case 0:
-          std::string pattern1 = "[^\r\n\f]+";
-          std::string pattern2 = "[\r\n\f]+";
-          std::regex re1(pattern1);
-          std::regex re2(pattern2);
-          std::string fmt = "";
-          std::string newLine = regex_replace(getText() , re1 , fmt);
-          std::string spaces = regex_replace(getText() , re2 , fmt);
+    case 0: 
+         std::string pattern1="[^\r\n\f]+";
+         std::string pattern2="[\r\n\f]+";
+         std::regex re1(pattern1);
+         std::regex re2(pattern2);
+         std::string fmt="";
+         std::string newLine=regex_replace(getText(),re1,fmt);
+          std::string spaces = regex_replace(getText(),re2,fmt);
           int next = _input->LA(1);
           if (opened > 0 || next == '\r' || next == '\n' || next == '\f' || next == '#') {
-              // If we're inside a list or on a blank line, ignore all indents,
-              // dedents and line breaks.
-              skip();
-          } else {
-              emit(commonToken(NEWLINE , newLine));
-              int indent = getIndentationCount(spaces);
-              int previous = indents.empty() ? 0 : indents.top();
-              if (indent == previous) {
-                  // skip indents of the same size as the present indent-size
-                  skip();
-              } else if (indent > previous) {
-                  indents.push(indent);
-                  emit(commonToken(Python3Parser::INDENT , spaces));
-              } else {
-                  // Possibly emit more than 1 DEDENT token.
-                  while (!indents.empty() && indents.top() > indent) {
-                      this->emit(createDedent());
-                      indents.pop();
-                  }
-              }
+            // If we're inside a list or on a blank line, ignore all indents,
+            // dedents and line breaks.
+            skip();
           }
-          break;
-    
+          else {
+            emit(commonToken(NEWLINE, newLine));
+            int indent = getIndentationCount(spaces);
+            int previous = indents.empty() ? 0 : indents.top();
+            if (indent == previous) {
+              // skip indents of the same size as the present indent-size
+              skip();
+            }
+            else if (indent > previous) {
+              indents.push(indent);
+              emit(commonToken(Python3Parser::INDENT, spaces));
+            }
+            else {
+              // Possibly emit more than 1 DEDENT token.
+              while(!indents.empty() && indents.top() > indent) {
+                this->emit(createDedent());
+                indents.pop();
+              }
+            }
+          }
+        break;
+
+  default:
+    break;
   }
 }
 
