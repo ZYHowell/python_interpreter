@@ -1,16 +1,16 @@
 #include "Evalvisitor.h"
 inline bool EvalVisitor::isList(antlrcpp::Any &it)
 {
-    return (it.is<std::vector<Any>>() || 
-            it.is<std::vector<Any *>>()
+    return (it.is<std::shared_ptr<std::vector<Any>>>() || 
+            it.is<std::shared_ptr<std::vector<Any*>>>()
             )
 }
 inline size_t EvalVisitor::AreNames(antlrcpp::Any &list) 
 {
-    if (!list.is<std::vector<antlrcpp::Any>>()) {
+    if (!list.is<std::shared_ptr<std::vector<antlrcpp::Any>>>()) {
         //err
     }
-    auto names = list.as<std::vector<antlrcpp::Any>>();
+    auto names = *list.as<std::shared_ptr<std::vector<antlrcpp::Any>>>();
     for (auto name : names) {
         if (!name.is<antlrcpp::Any *>)
             return 0;
@@ -33,7 +33,7 @@ inline int EvalVisitor::toInt(antlrcpp::Any &it)
 {
     if (it.is<std::string>() || it.is<sjtu::none_t>()) {
         //err
-    } else if (it.is<bool>()){
+    } else if (it.is<bool>()) {
         return it.as<bool>();
     } else if (it.is<int>()) {
         return it.as<int>();
@@ -45,7 +45,7 @@ inline bool EvalVisitor::toBool(Any &it)
         return it.as<std::string> != "";
     } else if (it.is<sjtu::none_t>()) {
         return false;
-    } else if (it.is<bool>) {
+    } else if (it.is<bool>()) {
         return it.as<bool>();
     } else return it.as<int>();
 }
@@ -56,8 +56,8 @@ inline void EvalVisitor::checkType(Any &a, Any &b)
     if (b.is<sjtu::none_t>()) {
         //err
     }
-    if ((a.is<std::string> && !b.is<std::string>) ||
-         !a.is<std::string && b.is<std::string>>) {
+    if ((a.is<std::string>() && !b.is<std::string>()) ||
+         !a.is<std::string>() && b.is<std::string>()) {
         //err
     }
     return;
