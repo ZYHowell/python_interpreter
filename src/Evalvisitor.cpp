@@ -1,32 +1,25 @@
 #include "Evalvisitor.h"
-/*
- *          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * Caution! Short-circuit has not been added!!!!!!!
- *          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
- * Caution! Double and super-long has not been supported!!!!
- *          !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-*/
 inline bool EvalVisitor::isList(antlrcpp::Any &it)
 {
-    return (it.is<std::shared_ptr<std::vector<Any>>>() || 
-            it.is<std::shared_ptr<std::vector<Any*>>>()
+    return (it.is<std::vector<Any>>() || 
+            it.is<std::vector<Any *>>()
             )
 }
 inline size_t EvalVisitor::AreNames(antlrcpp::Any &list) 
 {
-    if (!list.is<std::shared_ptr<std::vector<antlrcpp::Any>>>()) {
+    if (!list.is<std::vector<antlrcpp::Any>>()) {
         //err
     }
-    auto names = *list.as<std::shared_ptr<std::vector<antlrcpp::Any>>>();
+    auto names = list.as<std::vector<antlrcpp::Any>>();
     for (auto name : names) {
-        if (!name.is<antlrcpp::Any *>())
+        if (!name.is<antlrcpp::Any *>)
             return 0;
     }
     return names.size();
 }
 inline bool EvalVisitor::IsName(antlrcpp:: Any &ele)
 {
-    return ele.is<antlrcpp::Any *>();
+    return ele.is<antlrcpp::Any *>;
 }
 
 
@@ -49,10 +42,10 @@ inline int EvalVisitor::toInt(antlrcpp::Any &it)
 inline bool EvalVisitor::toBool(Any &it)
 {
     if (it.is<std::string>()) {
-        return it.as<std::string>() != "";
+        return it.as<std::string> != "";
     } else if (it.is<sjtu::none_t>()) {
         return false;
-    } else if (it.is<bool>()) {
+    } else if (it.is<bool>) {
         return it.as<bool>();
     } else return it.as<int>();
 }
@@ -63,8 +56,8 @@ inline void EvalVisitor::checkType(Any &a, Any &b)
     if (b.is<sjtu::none_t>()) {
         //err
     }
-    if ((a.is<std::string>() && !b.is<std::string>()) ||
-         !a.is<std::string>() && b.is<std::string>()) {
+    if ((a.is<std::string> && !b.is<std::string>) ||
+         !a.is<std::string && b.is<std::string>>) {
         //err
     }
     return;
@@ -74,8 +67,8 @@ inline void EvalVisitor::checkType(Any &a, Any &b)
 inline bool EvalVisitor::lessThan(Any &a, Any &b)
 {
     checkType(a, b);
-    if (a.is<std::string>()) {
-        return a.as<std::string>() < b.as<std::string>();
+    if (a.is<std::string>) {
+        return a.as<std::string> < b.as<std::string>;
     } else {
         return toInt(a) < toInt(b);
     }
@@ -83,8 +76,8 @@ inline bool EvalVisitor::lessThan(Any &a, Any &b)
 inline bool EvalVisitor::greaterThan(Any &a, Any &b)
 {
     checkType(a, b);
-    if (a.is<std::string>()) {
-        return a.as<std::string>() > b.as<std::string>();
+    if (a.is<std::string>) {
+        return a.as<std::string> > b.as<std::string>;
     } else {
         return toInt(a) > toInt(b);
     }
@@ -92,8 +85,8 @@ inline bool EvalVisitor::greaterThan(Any &a, Any &b)
 inline bool EvalVisitor::equals(Any &a, Any &b)
 {
     checkType(a, b);
-    if (a.is<std::string>()) {
-        return a.as<std::string>() == b.as<std::string>();
+    if (a.is<std::string>) {
+        return a.as<std::string> == b.as<std::string>;
     } else {
         return toInt(a) == toInt(b);
     }
@@ -101,8 +94,8 @@ inline bool EvalVisitor::equals(Any &a, Any &b)
 inline bool EvalVisitor::gtEq(Any &a, Any &b)
 {
     checkType(a, b);
-    if (a.is<std::string>()) {
-        return a.as<std::string>() >= b.as<std::string>();
+    if (a.is<std::string>) {
+        return a.as<std::string> >= b.as<std::string>;
     } else {
         return toInt(a) >= toInt(b);
     }
@@ -110,8 +103,8 @@ inline bool EvalVisitor::gtEq(Any &a, Any &b)
 inline bool EvalVisitor::lsEq(Any &a, Any &b)
 {
     checkType(a, b);
-    if (a.is<std::string>()) {
-        return a.as<std::string>() <= b.as<std::string>();
+    if (a.is<std::string>) {
+        return a.as<std::string> <= b.as<std::string>;
     } else {
         return toInt(a) <= toInt(b);
     }
@@ -142,7 +135,7 @@ virtual antlrcpp::Any EvalVisitor::visitFile_input(Python3Parser::File_inputCont
 
 virtual antlrcpp::Any EvalVisitor::visitFuncdef(Python3Parser::FuncdefContext *ctx) 
 {
-    auto params = visit(ctx->parameters()).as<std::vector<sjtu::funcArg>>();
+    auto params = visit(ctx->parameters());
     program.funcs.insert(std::make_pair(ctx->NAME()->toString(), Function(ctx->suite(), *params)));
     return Any();
 }
@@ -150,7 +143,7 @@ virtual antlrcpp::Any EvalVisitor::visitFuncdef(Python3Parser::FuncdefContext *c
 virtual antlrcpp::Any EvalVisitor::visitParameters(Python3Parser::ParametersContext *ctx) 
 {
     if (ctx->typedargslist() == nullptr) {
-        return std::make_shared<std::vector<std::string>>(std::vector<sjtu::funcArg>());
+        return std::make_shared<std::vector<std::string>>(std::vector<std::string>());
     } else{
         return visit(ctx->typedargslist());
     }
@@ -158,13 +151,12 @@ virtual antlrcpp::Any EvalVisitor::visitParameters(Python3Parser::ParametersCont
 
 virtual antlrcpp::Any EvalVisitor::visitTypedargslist(Python3Parser::TypedargslistContext *ctx) 
 {
-    std::vector<sjtu::funcArg> ret(ctx->tfdef().size());
-    for (size_t i = 0;i < ret.size();++i)
+    return visitChildren(ctx);
 }
 
 virtual antlrcpp::Any EvalVisitor::visitTfpdef(Python3Parser::TfpdefContext *ctx) 
 {
-    return ctx->NAME()->toString();
+    return visitChildren(ctx);
 }
 
 virtual antlrcpp::Any EvalVisitor::visitStmt(Python3Parser::StmtContext *ctx) 
@@ -421,7 +413,7 @@ virtual antlrcpp::Any EvalVisitor::visitArith_expr(Python3Parser::Arith_exprCont
         //err
     }
     
-    if (ret.is<std::string>()) {
+    if (ret.is<std::string>) {
         if (minusMax) {
             //err
         }
@@ -509,10 +501,10 @@ virtual antlrcpp::Any EvalVisitor::visitFactor(Python3Parser::FactorContext *ctx
         else if (ret.is<std::string>() || (ret.is<sjtu::none_t>())) {
             //cerr
         } else {
-            if (ret.is<bool>()) {
+            if (ret.is<bool>) {
                 return -1 * (int)ret.as<bool>();
             }
-            else return -1 * ret.as<int>();
+            else return -1 * ret.as<int>(;)
         }
     }
 }
@@ -533,23 +525,15 @@ virtual antlrcpp::Any EvalVisitor::visitAtom_expr(Python3Parser::Atom_exprContex
             if (!program.funcs.count(funcName)) {
                 //err
             }
-            auto paraNum = *visit(ctx->trailer()).as<std::shared_ptr<std::vector<antlrcpp::Any>>>();
+            auto paraNum = visit(ctx->trailer()).as<std::vector<antlrcpp::Any>>;
             Function func = program.funcs[funcName];
             //needs to be improved since it is slow.
             program.frames.push(Frame());
-            std::map<std::string, antlrcpp::Any> *mem = program.frames.top().memory;
+            std::map<std::string, antlrcpp::Any> *mem = program.frames.top.memory;
             size_t num = func.params.size();
-            bool isPositional = false;
-            sjtu::funcArg it;
             for (size_t i = 0;i < num;++i) {
-                it = paraNum[i].as<sjtu::funcArg>();
-                if (isPositional) {
-                    if (!it.type) {
-                        //err
-                    } else {
-
-                    }
-                }
+                (*mem)[func.params[i]] = paraNum[i];
+                //needs to be improved
             }
             
             auto ret = visit(func.suite);
@@ -574,9 +558,6 @@ virtual antlrcpp::Any EvalVisitor::visitAtom(Python3Parser::AtomContext *ctx)
 {
     if (program.checkIsName) {
         if (ctx->NAME() != nullptr) {
-            if (!program.count(ctx->NAME()->toString())) {
-                //err
-            }
             return program.getValue(ctx->NAME()->toString());
         }
         else {
@@ -584,8 +565,8 @@ virtual antlrcpp::Any EvalVisitor::visitAtom(Python3Parser::AtomContext *ctx)
         }
     }
     if (ctx->NUMBER() != nullptr){
-        //do not suppotr double now. waiting to be improved
-        return std::atoi((ctx->NUMBER()->toString()).c_str());
+        //this version do not support superlong caculation and double
+
     } else if (ctx->NAME() != nullptr) {
         std::string name = ctx->NAME()->toString();
         return *program.getValue(name);
@@ -611,18 +592,18 @@ virtual antlrcpp::Any EvalVisitor::visitNamelist(Python3Parser::NamelistContext 
     for (auto nameEle : ctx->NAME()) {
         ret[i++] = visit(nameEle);
     }
-    return std::make_shared<std::vector<antlrcpp::Any *>>(ret);
+    return ret;
 }
 
 virtual antlrcpp::Any EvalVisitor::visitTestlist(Python3Parser::TestlistContext *ctx) 
 {
-    std::vector<Any> ret(ctx->test().size());
+    std::vector<antlrcpp::Any> ret(ctx->test().size());
     size_t i = 0;
     Any result;
     for (auto testEle : ctx->test()) {
         ret[i++] = visit(testEle);
     }
-    return std::make_shared<std::vector<Any>>(ret);
+    return ret;
 }
 
 virtual antlrcpp::Any EvalVisitor::visitArglist(Python3Parser::ArglistContext *ctx) 
@@ -633,13 +614,12 @@ virtual antlrcpp::Any EvalVisitor::visitArglist(Python3Parser::ArglistContext *c
     std::vector<Any> ret(args.size());
     for (auto arg : args) {
         ret[i] = visit(arg);
-        if (!isPositional && ret[i].as<sjtu::funcArg>().type) isPositional = true;
+        if (ret[i].as<sjtu::funcArg>().type) isPositional = true;
         else if (isPositional) {
             //err
         }
         ++i;
     }
-    return std::make_shared<std::vector<Any>>(ret);
 }
 
 virtual antlrcpp::Any EvalVisitor::visitArgument(Python3Parser::ArgumentContext *ctx) 

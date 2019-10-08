@@ -117,7 +117,7 @@ stmt: simple_stmt | compound_stmt;
 simple_stmt: small_stmt  NEWLINE;
 small_stmt: expr_stmt | flow_stmt;
 expr_stmt: testlist ( (augassign testlist) |
-                     ('=' testlist)*);//è¿ç­‰ åŠ ç­‰/å‡ç­‰/...
+                     ('=' testlist)*);//Á¬µÈ ¼ÓµÈ/¼õµÈ/...
 augassign: ('+=' | '-=' | '*=' | '/=' );
 flow_stmt: break_stmt | continue_stmt | return_stmt;
 break_stmt: 'break';
@@ -140,7 +140,7 @@ atom_expr: atom trailer?;
 trailer: '(' (arglist)? ')' ;
 atom: (NAME | NUMBER | STRING+| 'None' | 'True' | 'False');
 namelist: (NAME) (',' (NAME))* (',')?;
-testlist: test (',' test)* (',')?;//ç®—å¼  egï¼š a,b   a   a+b
+testlist: test (',' test)* (',')?;//ËãÊ½  eg£º a,b   a   a+b
 arglist: argument (',' argument)*  (',')?;
 argument: ( test |
             test '=' test );
