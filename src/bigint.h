@@ -303,7 +303,15 @@ public:
         return !(*this != bInt);
     }
     explicit operator double(){
-        for(int i=)
+        double tmp=0;
+        for (int i = num.size() - 1; i >= 0; i--) {
+            tmp*=10;
+            tmp+=num[i];
+        }
+        if (symbol) {
+            tmp*=-1;
+        }
+        return tmp;
     }
 };
 
