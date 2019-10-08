@@ -14,9 +14,6 @@ Python3Lexer::Python3Lexer(CharStream *input) : Lexer(input) {
 
 Python3Lexer::~Python3Lexer() {
   delete _interpreter;
-    for (auto i:tokens) {
-        delete i;
-    }
 }
 
 std::string Python3Lexer::getGrammarFileName() const {
