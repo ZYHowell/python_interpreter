@@ -44,8 +44,6 @@ public:
     virtual antlrcpp::Any visitTestlist(Python3Parser::TestlistContext *ctx);
     virtual antlrcpp::Any visitArglist(Python3Parser::ArglistContext *ctx);
     virtual antlrcpp::Any visitArgument(Python3Parser::ArgumentContext *ctx);
-    inline size_t AreNames(Any list);
-    inline bool IsName(Any &ele);
     inline size_t getNodeIndex(antlr4::tree::TerminalNode* it);
     inline bool isList(Any &it);
     inline int toInt(Any &it);

@@ -1,25 +1,15 @@
 #include "Evalvisitor.h"
+/*
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ * !!!!!Caution! Superlong int is not added!!!!!
+ * !!!!!Caution! Short-circuit is not added!!!!!
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+*/
 inline bool EvalVisitor::isList(antlrcpp::Any &it)
 {
     return (it.is<std::shared_ptr<std::vector<Any>>>() || 
             it.is<std::shared_ptr<std::vector<Any*>>>()
             )
-}
-inline size_t EvalVisitor::AreNames(antlrcpp::Any &list) 
-{
-    if (!list.is<std::shared_ptr<std::vector<antlrcpp::Any>>>()) {
-        //err
-    }
-    auto names = *list.as<std::shared_ptr<std::vector<antlrcpp::Any>>>();
-    for (auto name : names) {
-        if (!name.is<antlrcpp::Any *>)
-            return 0;
-    }
-    return names.size();
-}
-inline bool EvalVisitor::IsName(antlrcpp:: Any &ele)
-{
-    return ele.is<antlrcpp::Any *>;
 }
 
 
@@ -31,6 +21,9 @@ inline size_t EvalVisitor::getNodeIndex(antlr4::tree::TerminalNode* it)
 
 inline int EvalVisitor::toInt(antlrcpp::Any &it)
 {
+    if (isList(it)) {
+        //err
+    }
     if (it.is<std::string>() || it.is<sjtu::none_t>()) {
         //err
     } else if (it.is<bool>()) {
@@ -41,8 +34,11 @@ inline int EvalVisitor::toInt(antlrcpp::Any &it)
 }
 inline bool EvalVisitor::toBool(Any &it)
 {
+    if (isList(it)) {
+        //err
+    }
     if (it.is<std::string>()) {
-        return it.as<std::string> != "";
+        return it.as<std::string>() != "";
     } else if (it.is<sjtu::none_t>()) {
         return false;
     } else if (it.is<bool>()) {
@@ -67,8 +63,8 @@ inline void EvalVisitor::checkType(Any &a, Any &b)
 inline bool EvalVisitor::lessThan(Any &a, Any &b)
 {
     checkType(a, b);
-    if (a.is<std::string>) {
-        return a.as<std::string> < b.as<std::string>;
+    if (a.is<std::string>()) {
+        return a.as<std::string>() < b.as<std::string>();
     } else {
         return toInt(a) < toInt(b);
     }
@@ -76,8 +72,8 @@ inline bool EvalVisitor::lessThan(Any &a, Any &b)
 inline bool EvalVisitor::greaterThan(Any &a, Any &b)
 {
     checkType(a, b);
-    if (a.is<std::string>) {
-        return a.as<std::string> > b.as<std::string>;
+    if (a.is<std::string>()) {
+        return a.as<std::string>() > b.as<std::string>();
     } else {
         return toInt(a) > toInt(b);
     }
@@ -85,8 +81,8 @@ inline bool EvalVisitor::greaterThan(Any &a, Any &b)
 inline bool EvalVisitor::equals(Any &a, Any &b)
 {
     checkType(a, b);
-    if (a.is<std::string>) {
-        return a.as<std::string> == b.as<std::string>;
+    if (a.is<std::string>()) {
+        return a.as<std::string>() == b.as<std::string>();
     } else {
         return toInt(a) == toInt(b);
     }
@@ -94,8 +90,8 @@ inline bool EvalVisitor::equals(Any &a, Any &b)
 inline bool EvalVisitor::gtEq(Any &a, Any &b)
 {
     checkType(a, b);
-    if (a.is<std::string>) {
-        return a.as<std::string> >= b.as<std::string>;
+    if (a.is<std::string>()) {
+        return a.as<std::string>() >= b.as<std::string>();
     } else {
         return toInt(a) >= toInt(b);
     }
@@ -103,8 +99,8 @@ inline bool EvalVisitor::gtEq(Any &a, Any &b)
 inline bool EvalVisitor::lsEq(Any &a, Any &b)
 {
     checkType(a, b);
-    if (a.is<std::string>) {
-        return a.as<std::string> <= b.as<std::string>;
+    if (a.is<std::string>()) {
+        return a.as<std::string>() <= b.as<std::string>();
     } else {
         return toInt(a) <= toInt(b);
     }
@@ -127,23 +123,29 @@ virtual antlrcpp::Any EvalVisitor::visitFile_input(Python3Parser::File_inputCont
     for (auto stmtEle : ctx->stmt()) {
         ret = judgeSuite(visit(stmtEle));
         if (ret.is<sjtu::none_t>()) continue;
-        else ret = ret.as<sjtu::flowRet>().retValue;
-        //then check what type the retvalue is and return it/them;
+        else {
+            if (ret.as<sjtu::flowRet>().type != 3) {
+                //err
+            }
+            else {
+                ret = ret.as<sjtu::flowRet>().retValue;
+            }
+        }
     }
     return 0;
 }
 
 virtual antlrcpp::Any EvalVisitor::visitFuncdef(Python3Parser::FuncdefContext *ctx) 
 {
-    auto params = visit(ctx->parameters());
+    auto params = visit(ctx->parameters()).as<std::shared_ptr<std::vector<sjtu::funcArg>>>();
     program.funcs.insert(std::make_pair(ctx->NAME()->toString(), Function(ctx->suite(), *params)));
-    return Any();
+    return none_t();
 }
 
 virtual antlrcpp::Any EvalVisitor::visitParameters(Python3Parser::ParametersContext *ctx) 
 {
     if (ctx->typedargslist() == nullptr) {
-        return std::make_shared<std::vector<std::string>>(std::vector<std::string>());
+        return std::make_shared<std::vector<sjtu::funcArg>>(std::vector<std::sjtu::funcArg>());
     } else{
         return visit(ctx->typedargslist());
     }
@@ -151,12 +153,19 @@ virtual antlrcpp::Any EvalVisitor::visitParameters(Python3Parser::ParametersCont
 
 virtual antlrcpp::Any EvalVisitor::visitTypedargslist(Python3Parser::TypedargslistContext *ctx) 
 {
-    return visitChildren(ctx);
+    auto tfps = ctx->tfpdef();
+    auto tests = ctx->test();
+    size_t i = 0;
+    std::vector<sjtu::funcArg> ret(tfps.size());
+    for (tfp : tfps) {
+        ret[i] = sjtu::funcArg(visit(tests[i]), 1, visit(tfp));
+    }
+    return std::make_shared<std::vector<sjtu::funcArg>>(ret);
 }
 
 virtual antlrcpp::Any EvalVisitor::visitTfpdef(Python3Parser::TfpdefContext *ctx) 
 {
-    return visitChildren(ctx);
+    return ctx->Name()->toString();
 }
 
 virtual antlrcpp::Any EvalVisitor::visitStmt(Python3Parser::StmtContext *ctx) 
@@ -186,7 +195,8 @@ virtual antlrcpp::Any EvalVisitor::visitSmall_stmt(Python3Parser::Small_stmtCont
 virtual antlrcpp::Any EvalVisitor::visitExpr_stmt(Python3Parser::Expr_stmtContext *ctx) 
 {
     antlrcpp::Any testEle;
-    auto result = visit(ctx->testlist(ctx->testlist.size() - 1));
+    std::vector<Any> contents;
+    auto result = *visit(ctx->testlist(ctx->testlist.size() - 1)).as<std::shared_ptr<std::vector<Any>>>();
     if (ctx->augassign() == nullptr) {
         program.checkIsName = true;
         testEle = visit(ctx->testlist(0));
@@ -194,6 +204,7 @@ virtual antlrcpp::Any EvalVisitor::visitExpr_stmt(Python3Parser::Expr_stmtContex
         if (isList(testEle)) {
             //err
         }
+        contents = 
         if (ctx->augassign()->ADD_ASSIGN != nullptr) {
 
         } else if (ctx->augassign()->SUB_ASSIGN() != nullptr) {
@@ -206,13 +217,21 @@ virtual antlrcpp::Any EvalVisitor::visitExpr_stmt(Python3Parser::Expr_stmtContex
     } else {
         program.checkIsName = true;
         for (size_t i = ctx->testlist.size() - 2;i >= 0;--i) {
-            list = testEle(ctx->testlist(i))
+            testEle = visit(ctx->testlist(i))
+            if (!isList(testEle)) {
+                //err
+            } else {
+                contents = 
+                if (contents.size() != result.size()) {
+                    //err
+                } else {
+
+                }
+            }
         }
         program.checkIsName = false;
-
-
     }
-    return Any();
+    return sjtu::none_t();
 }
 
 virtual antlrcpp::Any EvalVisitor::visitAugassign(Python3Parser::AugassignContext *ctx) 
@@ -272,7 +291,7 @@ virtual antlrcpp::Any EvalVisitor::visitIf_stmt(Python3Parser::If_stmtContext *c
             return visit(ctx->suite(ctx->ELIF().size() + 1));
         }
     }
-    return Any();
+    return sjtu::none_t();
 }
 
 virtual antlrcpp::Any EvalVisitor::visitWhile_stmt(Python3Parser::While_stmtContext *ctx) 
@@ -299,11 +318,14 @@ virtual antlrcpp::Any EvalVisitor::visitSuite(Python3Parser::SuiteContext *ctx)
         while (current < num) {
             auto stmtRet = visit(ctx->stmt(current));
             if (stmtRet.is<sjtu::flowRet>()) {
-                return stmtRet();
+                return stmtRet;
 /*
     a judgement is needed there since such a situation is avaliable in grammar:
     in a function, there is no while but a break/continue is found.
     i hope it can be found and throw here. 
+    e.g.: def a(): break
+    Maybe a stack to record avaliable while_stmt in this function?
+    Or, solve it in higher level? like where to use suite?
 */ 
             } else ++current;
         }
@@ -323,7 +345,11 @@ virtual antlrcpp::Any EvalVisitor::visitOr_test(Python3Parser::Or_testContext *c
         if (program.checkIsName) {
             //err
         }
-        return toBool(visit(ctx->and_test(0))) || toBool(visit(ctx->and_test(1)));
+        if (toBool(visit(ctx->and_test(0)))) {
+            return true;
+        } else {
+            return toBool(visit(ctx->and_test(1)));
+        }
     }
 }
 
@@ -335,7 +361,11 @@ virtual antlrcpp::Any EvalVisitor::visitAnd_test(Python3Parser::And_testContext 
         if (program.checkIsName) {
             //err
         }
-        return toBool(visit(ctx->not_test(0))) && toBool(visit(ctx->not_test(1)));
+        if (!toBool(visit(ctx->not_test(0)))) {
+            return false;
+        } else {
+            return toBool(visit(ctx->not_test(1)));
+        }
     }
 }
 
@@ -361,30 +391,30 @@ virtual antlrcpp::Any EvalVisitor::visitComparison(Python3Parser::ComparisonCont
     auto comp_op = ctx->comp_op();
     if (!comp_op.size())
         return expre[0];
-    if (program.checkIsName || expre[0].is<sjtu::none_t>()) {
+    if (program.checkIsName) {
         //err
     }
     for (auto op : comp_op){
         expre[!fir] = visit(ctx->arith_expr(++num));
-        //since STRING type, the comparison may need to be improved
+        //since NONE and STRING type, the comparisons are improved and packed
         if (op->LESS_THAN() != nullptr){
-            if lessThan(!expre[fir], expre[!fir])
+            if lessThan(expre[fir], expre[!fir])
                 return false;
         }
         else if (op->GREATER_THAN() != nullptr) {
-            if greaterThan(!expre[fir], expre[!fir])
+            if greaterThan(expre[fir], expre[!fir])
                 return false;
         }
         else if (op->EQUALS() != nullptr) {
-            if equals(!expre[fir], expre[!fir])
+            if equals(expre[fir], expre[!fir])
                 return false;
         }
         else if (op->GT_EQ() != nullptr) {
-            if gtEq(!expre[fir], expre[!fir])
+            if gtEq(expre[fir], expre[!fir])
                 return false;
         }
         else{
-            if lsEq(!expre[fir], expre[!fir])
+            if lsEq(expre[fir], expre[!fir])
                 return false;
         }
         fir = !fir;
@@ -412,14 +442,21 @@ virtual antlrcpp::Any EvalVisitor::visitArith_expr(Python3Parser::Arith_exprCont
     if (program.checkIsName || ret.is<sjtu::none_t>()) {
         //err
     }
-    
-    if (ret.is<std::string>) {
+    if (isList(ret)) {
+        //err
+    }
+    if (ret.is<std::string>()) {
         if (minusMax) {
             //err
         }
         std::string result = ret.as<std::string>();
+        Any tmp;
         for (size_t i = 1;i < num;++i) {
-            result = result + visit(ctx->term(i)).as<std::string>();
+            tmp = visit(ctx->term(i));
+            if (!tmp.is<std::string>()) {
+                //err
+            }
+            result = result + tmp.as<std::string>();
         }
         return result;
     }
@@ -447,8 +484,8 @@ virtual antlrcpp::Any EvalVisitor::visitArith_expr(Python3Parser::Arith_exprCont
 
 virtual antlrcpp::Any EvalVisitor::visitTerm(Python3Parser::TermContext *ctx) 
 {
-    auto ret = visit(ctx->term(0));
-    size_t num = visit(ctx->term().size());
+    auto ret = visit(ctx->factor(0));
+    size_t num = visit(ctx->factor().size());
     size_t starN = 0, divN = 0, starMax = ctx->STAR().size(), divMax = ctx->DIV().size();
     
     if (num == 1) return ret;
@@ -456,11 +493,10 @@ virtual antlrcpp::Any EvalVisitor::visitTerm(Python3Parser::TermContext *ctx)
     if (program.checkIsName) {
         //err
     }
-
     int result = toInt(ret);
     int nex;
     for (size_t i = 1;i < num;++i) {
-        nex = toInt(visit(ctx->term(i)));
+        nex = toInt(visit(ctx->factor(i)));
         if (starN >= starMax) {
             result /= nex;
             ++divN;
@@ -488,23 +524,23 @@ virtual antlrcpp::Any EvalVisitor::visitFactor(Python3Parser::FactorContext *ctx
             //err
         }
         Any ret = visit(ctx->factor());
-        if (ctx->ADD() != nullptr) {
-            if (ret.is<std::string>() || (ret.is<sjtu::none_t>())) {
-                //err
-            } else {
-                if (ret.is<bool>) {
-                    return (int)ret.as<bool>();
-                }
-                else return ret;
-            }
+        if (isList(ret)) {
+            //err
         }
-        else if (ret.is<std::string>() || (ret.is<sjtu::none_t>())) {
-            //cerr
-        } else {
-            if (ret.is<bool>) {
+        if (ret.is<std::string>() || (ret.is<sjtu::none_t>())) {
+            //err
+        }
+        if (ctx->ADD() != nullptr) {
+            if (ret.is<bool>()) {
+                return (int)ret.as<bool>();
+            }
+            else return ret;
+        }
+        else {
+            if (ret.is<bool>()) {
                 return -1 * (int)ret.as<bool>();
             }
-            else return -1 * ret.as<int>(;)
+            else return -1 * ret.as<int>();
         }
     }
 }
@@ -525,7 +561,7 @@ virtual antlrcpp::Any EvalVisitor::visitAtom_expr(Python3Parser::Atom_exprContex
             if (!program.funcs.count(funcName)) {
                 //err
             }
-            auto paraNum = visit(ctx->trailer()).as<std::vector<antlrcpp::Any>>;
+            auto paraNum = *visit(ctx->trailer()).as<std::shared_ptr<std::vector<antlrcpp::Any>>>();
             Function func = program.funcs[funcName];
             //needs to be improved since it is slow.
             program.frames.push(Frame());
@@ -537,11 +573,12 @@ virtual antlrcpp::Any EvalVisitor::visitAtom_expr(Python3Parser::Atom_exprContex
             }
             
             auto ret = visit(func.suite);
+            if (ret.is<sjtu::flowRet>() && ret.as<sjtu::flowRet>().type != 3) {
+                //err like: def a(): break/continue
+            }
             program.frames.pop();
 
-            if (ret.is<sjtu::nont_t>())
-                return ret;
-            else return ret.as<sjtu::flowRet>().retValue;
+            return judgeSuite(ret);
         }
     } else {
         Any ret = visit(ctx->atom());
@@ -570,6 +607,7 @@ virtual antlrcpp::Any EvalVisitor::visitAtom(Python3Parser::AtomContext *ctx)
     } else if (ctx->NAME() != nullptr) {
         std::string name = ctx->NAME()->toString();
         return *program.getValue(name);
+        //no need to return name if checkIsName=false
     } else if (ctx->STRING().size() != 0) {
         std::string ret = "";
         for (auto &str : ctx->STRING()) {
@@ -585,16 +623,6 @@ virtual antlrcpp::Any EvalVisitor::visitAtom(Python3Parser::AtomContext *ctx)
     }
 }
 
-virtual antlrcpp::Any EvalVisitor::visitNamelist(Python3Parser::NamelistContext *ctx) 
-{
-    std::vector<antlrcpp::Any *> ret(ctx->NAME().size());
-    size_t i = 0;
-    for (auto nameEle : ctx->NAME()) {
-        ret[i++] = visit(nameEle);
-    }
-    return ret;
-}
-
 virtual antlrcpp::Any EvalVisitor::visitTestlist(Python3Parser::TestlistContext *ctx) 
 {
     std::vector<antlrcpp::Any> ret(ctx->test().size());
@@ -603,7 +631,7 @@ virtual antlrcpp::Any EvalVisitor::visitTestlist(Python3Parser::TestlistContext 
     for (auto testEle : ctx->test()) {
         ret[i++] = visit(testEle);
     }
-    return ret;
+    return std::make_shared<std::vector<antlrcpp::Any>>(ret);
 }
 
 virtual antlrcpp::Any EvalVisitor::visitArglist(Python3Parser::ArglistContext *ctx) 
@@ -620,6 +648,7 @@ virtual antlrcpp::Any EvalVisitor::visitArglist(Python3Parser::ArglistContext *c
         }
         ++i;
     }
+    return std::make_shared<std::vector<antlrcpp::Any>>(ret);
 }
 
 virtual antlrcpp::Any EvalVisitor::visitArgument(Python3Parser::ArgumentContext *ctx) 
