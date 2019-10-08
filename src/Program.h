@@ -11,7 +11,7 @@ struct Frame
 {
     std::map<std::string,antlrcpp::Any> *memory;
     antlr4::tree::ParseTree* returnnode;
-    Frame():
+    Frame()
     {
         memory = new std::map<std::string, antlrcpp::Any>;
     }
@@ -47,7 +47,7 @@ public:
 class ERRORS 
 {
     
-}
+};
 
 
 #endif //PYTHON_INTERPRETER_PROGRAM_H

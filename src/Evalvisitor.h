@@ -27,7 +27,6 @@ public:
     virtual antlrcpp::Any visitCompound_stmt(Python3Parser::Compound_stmtContext *ctx);
     virtual antlrcpp::Any visitIf_stmt(Python3Parser::If_stmtContext *ctx);
     virtual antlrcpp::Any visitWhile_stmt(Python3Parser::While_stmtContext *ctx);
-    virtual antlrcpp::Any visitFor_stmt(Python3Parser::For_stmtContext *ctx);
     virtual antlrcpp::Any visitSuite(Python3Parser::SuiteContext *ctx);
     virtual antlrcpp::Any visitTest(Python3Parser::TestContext *ctx);
     virtual antlrcpp::Any visitOr_test(Python3Parser::Or_testContext *ctx);
