@@ -565,7 +565,7 @@ virtual antlrcpp::Any EvalVisitor::visitAtom(Python3Parser::AtomContext *ctx)
         }
     }
     if (ctx->NUMBER() != nullptr){
-        //this version do not support superlong caculation
+        //this version do not support superlong caculation and double
 
     } else if (ctx->NAME() != nullptr) {
         std::string name = ctx->NAME()->toString();
