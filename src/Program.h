@@ -35,11 +35,11 @@ public:
 class Program 
 {
     using Any = antlrcpp::Any;
-    std::stack<Frame> tmp_frames;
     bool checkIsName;
 public:
     std::stack<Frame> frames;
     std::map<std::string,Function> funcs;
+    Frame global;
 public:
     Any *getValue(std::string name);
 };
