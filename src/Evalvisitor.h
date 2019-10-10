@@ -121,6 +121,33 @@ public:
         return sjtu::none_t();
     }
 
+    
+    void printVector(const std::vector<Any> &eles) 
+    {
+        bool tmpb;
+        std::string tmps;
+        int tmpi;
+        for (size_t i = 0;i < eles.size();++i) {
+            if (i) std::cout << ", ";
+            if (eles[i].is<bool>()) {
+                if (eles[i].as<bool>()) {
+                    std::cout << "True";
+                } else {
+                    std::cout << "False";
+                }
+            } else if (eles[i].is<int>()) {
+                std::cout << eles[i].as<int>();
+            } else if (eles[i].is<std::string>()) {
+                std::cout << eles[i].as<std::string>();
+            } else if (eles[i].is<sjtu::none_t>()) {
+                std::cout << "None";
+            } else if (eles[i].is<std::vector<Any>>()) {
+                std::cout << "(";
+                printVector(eles[i].as<std::vector<Any>>());
+                std::cout << ")";
+            }
+        }
+    }
 
     virtual antlrcpp::Any visitFile_input(Python3Parser::File_inputContext *ctx) 
     {
@@ -225,15 +252,17 @@ public:
         } else if (ctx->ASSIGN().size()){
             std::vector<Any> contents;
             program.checkIsName = true;
-            for (size_t i = ctx->testlist().size() - 2;i >= 0;--i) {
+            size_t m = ctx->testlist().size();
+            for (size_t i = 0;i < ctx->testlist().size() - 1;++i) {
 
                 contents = *visit(ctx->testlist(i)).as<std::shared_ptr<std::vector<Any>>>();
+
 
                 if (contents.size() != result.size()) {
                     //err
                 } else {
-                    for (size_t i = 0;i < contents.size();++i) {
-                        *(contents.at(i).as<Any*>()) = result[i];
+                    for (size_t j = 0;j < contents.size();++j) {
+                        *(contents.at(j).as<Any*>()) = result[j];
                     }
                 }
             }
@@ -305,7 +334,7 @@ public:
     virtual antlrcpp::Any visitWhile_stmt(Python3Parser::While_stmtContext *ctx) 
     {
         Any ret;
-        while(visit(ctx->test())) {
+        while(toBool(visit(ctx->test()))) {
             ret = visit(ctx->suite());
             if (ret.is<sjtu::flowRet>()) {
                 auto result = ret.as<sjtu::flowRet>();
@@ -563,15 +592,15 @@ public:
                 //err
             } else {
                 std::string funcName = ctx->atom()->NAME()->toString();
+                auto paraNum = *visit(ctx->trailer()).as<std::shared_ptr<std::vector<antlrcpp::Any>>>();
+                bool b = paraNum[0].is<sjtu::funcArg>();
                 if (funcName == "print") {
-                    //deal with Print
-                    printf("print");
-                    return sjtu::none_t();
+                    printVector(paraNum);
+                    std::cout << std::endl;
                 }
                 if (!program.funcs.count(funcName)) {
                     //err
                 }
-                auto paraNum = *visit(ctx->trailer()).as<std::shared_ptr<std::vector<antlrcpp::Any>>>();
                 Function *func = &program.funcs[funcName];
                 //needs to be improved since it is slow.
                 program.frames.push(Frame());
@@ -598,7 +627,9 @@ public:
 
     virtual antlrcpp::Any visitTrailer(Python3Parser::TrailerContext *ctx) 
     {
-        return visit(ctx->arglist());
+        auto ret = *visit(ctx->arglist()).as<std::shared_ptr<std::vector<Any>>>();
+        bool b = ret[0].is<sjtu::funcArg>();
+        return ret;
     }
 
     virtual antlrcpp::Any visitAtom(Python3Parser::AtomContext *ctx) 
@@ -613,7 +644,8 @@ public:
         }
         if (ctx->NUMBER() != nullptr){
             //this version do not support superlong caculation and double
-
+            int ret = std::atoi(ctx->NUMBER()->toString().c_str());
+            return ret;
         } else if (ctx->NAME() != nullptr) {
             std::string name = ctx->NAME()->toString();
             return *program.getValue(name);
@@ -649,16 +681,19 @@ public:
         auto args = ctx->argument();
         size_t i = 0;
         bool isPositional = false;
-        std::vector<Any> ret(args.size());
+        auto ret = std::make_shared<std::vector<Any>>(std::vector<Any>(args.size()));
+        //std::vector<Any> ret(args.size());
         for (auto arg : args) {
-            ret[i] = visit(arg);
-            if (ret[i].as<sjtu::funcArg>().type) isPositional = true;
+            ret->at(i) = visit(arg);
+            if (ret->at(i).as<sjtu::funcArg>().type) isPositional = true;
             else if (isPositional) {
                 //err
             }
             ++i;
+
         }
-        return std::make_shared<std::vector<antlrcpp::Any>>(ret);
+        bool b = ret->at(0).is<sjtu::funcArg>();
+        return ret;
     }
 
     virtual antlrcpp::Any visitArgument(Python3Parser::ArgumentContext *ctx) 

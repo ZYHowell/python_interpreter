@@ -42,6 +42,7 @@ public:
     std::map<std::string,Function> funcs;
     Frame global;
 public:
+    Program():checkIsName(false), frames(), funcs(), global(){}
     antlrcpp::Any* getValue(std::string name)
     {
         if (!frames.empty()) {
