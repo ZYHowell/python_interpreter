@@ -122,30 +122,40 @@ public:
         return sjtu::none_t();
     }
 
+    void printEle(const Any &it)
+    {
+        if (it.is<bool>()) {
+            if (it.as<bool>()) {
+                std::cout << "True";
+            } else {
+                std::cout << "False";
+            }
+        } else if (it.is<int>()) {
+            std::cout << it.as<int>();
+        } else if (it.is<std::string>()) {
+            std::cout << it.as<std::string>();
+        } else if (it.is<sjtu::none_t>()) {
+            std::cout << "None";
+        } else if (it.is<anyV_t>()) {
+            std::cout << "(";
+            printVector(it.as<anyV_t>());
+            std::cout << ")";
+        }
+    }
     
     void printVector(const anyV_t &eles) 
     {
-        bool tmpb;
-        std::string tmps;
-        int tmpi;
         for (size_t i = 0;i < eles.size();++i) {
             if (i) std::cout << ", ";
-            if (eles[i].is<bool>()) {
-                if (eles[i].as<bool>()) {
-                    std::cout << "True";
+            if (eles[i].is<sjtu::funcArg>()) {
+                if (eles[i].as<sjtu::funcArg>().type) {
+                    //err
                 } else {
-                    std::cout << "False";
+                    printEle(eles[i].as<sjtu::funcArg>().value);
                 }
-            } else if (eles[i].is<int>()) {
-                std::cout << eles[i].as<int>();
-            } else if (eles[i].is<std::string>()) {
-                std::cout << eles[i].as<std::string>();
-            } else if (eles[i].is<sjtu::none_t>()) {
-                std::cout << "None";
-            } else if (eles[i].is<anyV_t>()) {
-                std::cout << "(";
-                printVector(eles[i].as<anyV_t>());
-                std::cout << ")";
+            }
+            else {
+                printEle(eles[i]);
             }
         }
     }
@@ -394,7 +404,10 @@ public:
     antlrcpp::Any visitAnd_test(Python3Parser::And_testContext *ctx) override 
     {
         if (ctx->not_test().size() == 1) {
-            return visit(ctx->not_test(0));
+            auto ret = visit(ctx->not_test(0));
+            bool b = ret.is<std::string>();
+            auto it = ret.as<std::string>();
+            return ret;
         } else {
             if (program.checkIsName) {
                 //err
@@ -415,7 +428,10 @@ public:
             }
             return !toBool(visit(ctx->not_test()));
         } else {
-            return visit(ctx->comparison());
+            auto ret = visit(ctx->comparison());
+            bool b = ret.is<std::string>();
+            auto it = ret.as<std::string>();
+            return ret;
         }
     }
 
@@ -427,8 +443,11 @@ public:
         bool fir = 0;
         expre[0] = visit(ctx->arith_expr(num));
         auto comp_op = ctx->comp_op();
-        if (!comp_op.size())
+        if (!comp_op.size()){
+            bool b = expre[0].is<std::string>();
+            auto it = expre[0].as<std::string>();
             return expre[0];
+        }
         if (program.checkIsName) {
             //err
         }
@@ -593,10 +612,10 @@ public:
                 //err
             } else {
                 std::string funcName = ctx->atom()->NAME()->toString();
-                auto paraNum = *visit(ctx->trailer()).as<std::shared_ptr<anyV_t>>();
-                bool b = paraNum[0].is<sjtu::funcArg>();
+                auto paraNum = visit(ctx->trailer()).as<std::shared_ptr<anyV_t>>();
+                bool b = paraNum->operator[](0).is<sjtu::funcArg>();
                 if (funcName == "print") {
-                    printVector(paraNum);
+                    printVector(*paraNum);
                     std::cout << std::endl;
                     return sjtu::none_t();
                 }
@@ -609,7 +628,7 @@ public:
                 std::map<std::string, antlrcpp::Any> *mem = program.frames.top().memory;
                 size_t num = func->params.size();
                 for (size_t i = 0;i < num;++i) {
-                    mem->at((func->params[i]).name) = paraNum[i];
+                    //mem->at((func->params[i]).name) = paraNum->operator[]();
                     //needs to be improved
                 }
                 
@@ -630,7 +649,6 @@ public:
     antlrcpp::Any visitTrailer(Python3Parser::TrailerContext *ctx) override 
     {
         auto ret = visit(ctx->arglist()).as<std::shared_ptr<anyV_t>>();
-        bool b = ret->operator[](0).is<sjtu::funcArg>();
         return ret;
     }
 
@@ -693,7 +711,6 @@ public:
             ++i;
 
         }
-        bool b = ret->at(0).is<sjtu::funcArg>();
         return ret;
     }
 
