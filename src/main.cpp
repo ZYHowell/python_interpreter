@@ -1,6 +1,3 @@
-//
-// Created by jinho on 9/19/2019.
-//
 #include <iostream>
 #include "antlr4-runtime.h"
 #include "Python3Lexer.h"
@@ -27,4 +24,5 @@ int main(int argc, const char* argv[]){
     ifs.close();
 //    antlrcpp::Any tmp=1;
 //    std::cout<<tmp.is<double>();
+    return 0;
 }

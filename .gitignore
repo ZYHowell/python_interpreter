@@ -6,3 +6,12 @@
 /.idea/*
 /*.doc
 /*.docx
+
+/*.o
+/CMakeFiles/*
+/*.cmake
+/makefile
+/CMakeCache.txt
+/main
+/src/python_interpreter
+/*.a

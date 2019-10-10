@@ -30,18 +30,50 @@ public:
     Function(antlr4::tree::ParseTree* tree, 
              std::vector<sjtu::funcArg> &params)
              :suite(tree),params(params){}
+    Function(){}
 };
 
 class Program 
 {
     using Any = antlrcpp::Any;
-    bool checkIsName;
 public:
+    bool checkIsName;
     std::stack<Frame> frames;
     std::map<std::string,Function> funcs;
     Frame global;
 public:
-    Any *getValue(std::string name);
+    antlrcpp::Any* getValue(std::string name)
+    {
+        if (!frames.empty()) {
+            if (frames.top().memory->count(name))
+                return &(frames.top().memory->at(name));
+            else if (global.memory->count(name))
+                return &(global.memory->at(name));
+            else {
+                if (checkIsName) {
+                    frames.top().memory->insert(make_pair(name, Any()));
+                    return &(frames.top().memory->at(name));
+                }
+                else {
+                    //err
+                }
+            }  
+        }
+        else {
+            if (global.memory->count(name))
+                return &(global.memory->at(name));
+            else {
+                if (checkIsName) {
+                    global.memory->insert(make_pair(name, Any()));
+                    return &(global.memory->at(name));
+                }
+                else {
+                    //err
+                }    
+            }
+        }
+        return nullptr;
+    }
 };
 
 

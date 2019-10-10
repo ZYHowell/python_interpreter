@@ -47,7 +47,7 @@ namespace sjtu
         std::string name;
         antlrcpp::Any value;
         bool type;
-        funcArg(antlrcpp::Any &val, bool tp = 0, std::string n = ""):
+        funcArg(const antlrcpp::Any &val = antlrcpp::Any(), bool tp = 0, std::string n = ""):
             value(val), type(tp), name(n) {}
     };
 }
