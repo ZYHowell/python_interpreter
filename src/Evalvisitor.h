@@ -8,11 +8,12 @@
 class EvalVisitor: public Python3BaseVisitor {
 private:
     using Any = antlrcpp::Any;
+    using anyV_t = std::vector<Any>;
     Program program;
 public:
     inline bool isList(const Any &it)
     {
-        return (it.is<std::shared_ptr<std::vector<Any>>>() || 
+        return (it.is<std::shared_ptr<anyV_t>>() || 
                 it.is<std::shared_ptr<std::vector<Any*>>>()
                 );
     }
@@ -122,7 +123,7 @@ public:
     }
 
     
-    void printVector(const std::vector<Any> &eles) 
+    void printVector(const anyV_t &eles) 
     {
         bool tmpb;
         std::string tmps;
@@ -141,15 +142,15 @@ public:
                 std::cout << eles[i].as<std::string>();
             } else if (eles[i].is<sjtu::none_t>()) {
                 std::cout << "None";
-            } else if (eles[i].is<std::vector<Any>>()) {
+            } else if (eles[i].is<anyV_t>()) {
                 std::cout << "(";
-                printVector(eles[i].as<std::vector<Any>>());
+                printVector(eles[i].as<anyV_t>());
                 std::cout << ")";
             }
         }
     }
 
-    virtual antlrcpp::Any visitFile_input(Python3Parser::File_inputContext *ctx) 
+    antlrcpp::Any visitFile_input(Python3Parser::File_inputContext *ctx) override 
     {
         Any ret;
         for (auto stmtEle : ctx->stmt()) {
@@ -167,14 +168,14 @@ public:
         return 0;
     }
 
-    virtual antlrcpp::Any visitFuncdef(Python3Parser::FuncdefContext *ctx) 
+    antlrcpp::Any visitFuncdef(Python3Parser::FuncdefContext *ctx) override 
     {
         auto params = visit(ctx->parameters()).as<std::shared_ptr<std::vector<sjtu::funcArg>>>();
         program.funcs.insert(std::make_pair(ctx->NAME()->toString(), Function(ctx->suite(), *params)));
         return sjtu::none_t();
     }
 
-    virtual antlrcpp::Any visitParameters(Python3Parser::ParametersContext *ctx) 
+    antlrcpp::Any visitParameters(Python3Parser::ParametersContext *ctx) override 
     {
         if (ctx->typedargslist() == nullptr) {
             return std::make_shared<std::vector<sjtu::funcArg>>(std::vector<sjtu::funcArg>());
@@ -183,24 +184,24 @@ public:
         }
     }
 
-    virtual antlrcpp::Any visitTypedargslist(Python3Parser::TypedargslistContext *ctx) 
+    antlrcpp::Any visitTypedargslist(Python3Parser::TypedargslistContext *ctx) override 
     {
         auto tfps = ctx->tfpdef();
         auto tests = ctx->test();
         size_t i = 0;
-        std::vector<sjtu::funcArg> ret(tfps.size());
+        auto ret = std::make_shared<std::vector<sjtu::funcArg>>(std::vector<sjtu::funcArg>(tfps.size()));
         for (auto tfp : tfps) {
-            ret[i] = sjtu::funcArg(visit(tests[i]), 1, visit(tfp));
+            ret->operator[](i) = sjtu::funcArg(visit(tests[i]), 1, visit(tfp));
         }
-        return std::make_shared<std::vector<sjtu::funcArg>>(ret);
+        return ret;
     }
 
-    virtual antlrcpp::Any visitTfpdef(Python3Parser::TfpdefContext *ctx) 
+    antlrcpp::Any visitTfpdef(Python3Parser::TfpdefContext *ctx) override 
     {
         return ctx->NAME()->toString();
     }
 
-    virtual antlrcpp::Any visitStmt(Python3Parser::StmtContext *ctx) 
+    antlrcpp::Any visitStmt(Python3Parser::StmtContext *ctx) override 
     {
         if (ctx->simple_stmt() != nullptr) {
             return visit(ctx->simple_stmt());
@@ -209,12 +210,12 @@ public:
         }
     }
 
-    virtual antlrcpp::Any visitSimple_stmt(Python3Parser::Simple_stmtContext *ctx) 
+    antlrcpp::Any visitSimple_stmt(Python3Parser::Simple_stmtContext *ctx) override 
     {
         return visit(ctx->small_stmt());
     }
 
-    virtual antlrcpp::Any visitSmall_stmt(Python3Parser::Small_stmtContext *ctx) 
+    antlrcpp::Any visitSmall_stmt(Python3Parser::Small_stmtContext *ctx) override 
     {
         if (ctx->flow_stmt() == nullptr) {
             return visit(ctx->expr_stmt());
@@ -224,14 +225,14 @@ public:
     }
 
 
-    virtual antlrcpp::Any visitExpr_stmt(Python3Parser::Expr_stmtContext *ctx) 
+    antlrcpp::Any visitExpr_stmt(Python3Parser::Expr_stmtContext *ctx) override 
     {
         
-        auto result = *visit(ctx->testlist(ctx->testlist().size() - 1)).as<std::shared_ptr<std::vector<Any>>>();
+        auto result = *visit(ctx->testlist(ctx->testlist().size() - 1)).as<std::shared_ptr<anyV_t>>();
         
         if (ctx->augassign() != nullptr) {
             program.checkIsName = true;
-            auto testEle = *visit(ctx->testlist(0)).as<std::shared_ptr<std::vector<Any>>>();
+            auto testEle = *visit(ctx->testlist(0)).as<std::shared_ptr<anyV_t>>();
             program.checkIsName = false;
 
             if (testEle.size() != 1 || result.size() != 1) {
@@ -250,12 +251,12 @@ public:
             }
 
         } else if (ctx->ASSIGN().size()){
-            std::vector<Any> contents;
+            anyV_t contents;
             program.checkIsName = true;
             size_t m = ctx->testlist().size();
             for (size_t i = 0;i < ctx->testlist().size() - 1;++i) {
 
-                contents = *visit(ctx->testlist(i)).as<std::shared_ptr<std::vector<Any>>>();
+                contents = *visit(ctx->testlist(i)).as<std::shared_ptr<anyV_t>>();
 
 
                 if (contents.size() != result.size()) {
@@ -271,12 +272,12 @@ public:
         return sjtu::none_t();
     }
 
-    virtual antlrcpp::Any visitAugassign(Python3Parser::AugassignContext *ctx) 
+    antlrcpp::Any visitAugassign(Python3Parser::AugassignContext *ctx) override 
     {
         return visitChildren(ctx);
     }
 
-    virtual antlrcpp::Any visitFlow_stmt(Python3Parser::Flow_stmtContext *ctx) 
+    antlrcpp::Any visitFlow_stmt(Python3Parser::Flow_stmtContext *ctx) override 
     {
         if (ctx->break_stmt() != nullptr) {
             return visit(ctx->break_stmt());
@@ -287,22 +288,22 @@ public:
         }
     }
 
-    virtual antlrcpp::Any visitBreak_stmt(Python3Parser::Break_stmtContext *ctx) 
+    antlrcpp::Any visitBreak_stmt(Python3Parser::Break_stmtContext *ctx) override 
     {
         return sjtu::flowRet(1);
     }
 
-    virtual antlrcpp::Any visitContinue_stmt(Python3Parser::Continue_stmtContext *ctx) 
+    antlrcpp::Any visitContinue_stmt(Python3Parser::Continue_stmtContext *ctx) override 
     {
         return sjtu::flowRet(2);
     }
 
-    virtual antlrcpp::Any visitReturn_stmt(Python3Parser::Return_stmtContext *ctx) 
+    antlrcpp::Any visitReturn_stmt(Python3Parser::Return_stmtContext *ctx) override 
     {
         return sjtu::flowRet(3, visit(ctx->testlist()));
     }
 
-    virtual antlrcpp::Any visitCompound_stmt(Python3Parser::Compound_stmtContext *ctx) 
+    antlrcpp::Any visitCompound_stmt(Python3Parser::Compound_stmtContext *ctx) override 
     {
         if (ctx->if_stmt() != nullptr) {
             return visit(ctx->if_stmt());
@@ -313,7 +314,7 @@ public:
         }
     }
 
-    virtual antlrcpp::Any visitIf_stmt(Python3Parser::If_stmtContext *ctx) 
+    antlrcpp::Any visitIf_stmt(Python3Parser::If_stmtContext *ctx) override 
     {
         bool ret = toBool(visit(ctx->test(0)));
         if (ret) {
@@ -331,7 +332,7 @@ public:
         return sjtu::none_t();
     }
 
-    virtual antlrcpp::Any visitWhile_stmt(Python3Parser::While_stmtContext *ctx) 
+    antlrcpp::Any visitWhile_stmt(Python3Parser::While_stmtContext *ctx) override 
     {
         Any ret;
         while(toBool(visit(ctx->test()))) {
@@ -345,7 +346,7 @@ public:
         return sjtu::none_t();
     }
 
-    virtual antlrcpp::Any visitSuite(Python3Parser::SuiteContext *ctx) 
+    antlrcpp::Any visitSuite(Python3Parser::SuiteContext *ctx) override 
     {
         if (ctx->simple_stmt() != nullptr) {
             return judgeSuite(visit(ctx->simple_stmt()));
@@ -370,11 +371,11 @@ public:
         return sjtu::none_t();
     }
 
-    virtual antlrcpp::Any visitTest(Python3Parser::TestContext *ctx) 
+    antlrcpp::Any visitTest(Python3Parser::TestContext *ctx) override 
     {
         return visit(ctx->or_test());
     }
-    virtual antlrcpp::Any visitOr_test(Python3Parser::Or_testContext *ctx) 
+    antlrcpp::Any visitOr_test(Python3Parser::Or_testContext *ctx) override 
     {
         if (ctx->and_test().size() == 1) {
             return visit(ctx->and_test(0));
@@ -390,7 +391,7 @@ public:
         }
     }
 
-    virtual antlrcpp::Any visitAnd_test(Python3Parser::And_testContext *ctx) 
+    antlrcpp::Any visitAnd_test(Python3Parser::And_testContext *ctx) override 
     {
         if (ctx->not_test().size() == 1) {
             return visit(ctx->not_test(0));
@@ -406,7 +407,7 @@ public:
         }
     }
 
-    virtual antlrcpp::Any visitNot_test(Python3Parser::Not_testContext *ctx) 
+    antlrcpp::Any visitNot_test(Python3Parser::Not_testContext *ctx) override 
     {
         if (ctx->NOT() != nullptr){
             if (program.checkIsName) {
@@ -419,7 +420,7 @@ public:
     }
 
 
-    virtual antlrcpp::Any visitComparison(Python3Parser::ComparisonContext *ctx) 
+    antlrcpp::Any visitComparison(Python3Parser::ComparisonContext *ctx) override 
     {
         Any expre[2];
         size_t num = 0;
@@ -459,13 +460,13 @@ public:
         return true;
     }
 
-    virtual antlrcpp::Any visitComp_op(Python3Parser::Comp_opContext *ctx) 
+    antlrcpp::Any visitComp_op(Python3Parser::Comp_opContext *ctx) override 
     {
         //no need to override it, or in order to be safer, it is necessary to override?
         return visitChildren(ctx);
     }
 
-    virtual antlrcpp::Any visitArith_expr(Python3Parser::Arith_exprContext *ctx) 
+    antlrcpp::Any visitArith_expr(Python3Parser::Arith_exprContext *ctx) override 
     {
         //waiting to check validity
         auto ret = visit(ctx->term(0));
@@ -519,7 +520,7 @@ public:
         return result;
     }
 
-    virtual antlrcpp::Any visitTerm(Python3Parser::TermContext *ctx) 
+    antlrcpp::Any visitTerm(Python3Parser::TermContext *ctx) override 
     {
         auto ret = visit(ctx->factor(0));
         size_t num = ctx->factor().size();
@@ -551,7 +552,7 @@ public:
         return result;
     }
 
-    virtual antlrcpp::Any visitFactor(Python3Parser::FactorContext *ctx) 
+    antlrcpp::Any visitFactor(Python3Parser::FactorContext *ctx) override 
     {
         //waiting to check validity
         if (ctx->atom_expr() != nullptr) {
@@ -582,7 +583,7 @@ public:
         }
     }
 
-    virtual antlrcpp::Any visitAtom_expr(Python3Parser::Atom_exprContext *ctx) 
+    antlrcpp::Any visitAtom_expr(Python3Parser::Atom_exprContext *ctx) override 
     {
         if (ctx->trailer() != nullptr) {
             if (program.checkIsName) {
@@ -592,11 +593,12 @@ public:
                 //err
             } else {
                 std::string funcName = ctx->atom()->NAME()->toString();
-                auto paraNum = *visit(ctx->trailer()).as<std::shared_ptr<std::vector<antlrcpp::Any>>>();
+                auto paraNum = *visit(ctx->trailer()).as<std::shared_ptr<anyV_t>>();
                 bool b = paraNum[0].is<sjtu::funcArg>();
                 if (funcName == "print") {
                     printVector(paraNum);
                     std::cout << std::endl;
+                    return sjtu::none_t();
                 }
                 if (!program.funcs.count(funcName)) {
                     //err
@@ -625,14 +627,14 @@ public:
         }
     }
 
-    virtual antlrcpp::Any visitTrailer(Python3Parser::TrailerContext *ctx) 
+    antlrcpp::Any visitTrailer(Python3Parser::TrailerContext *ctx) override 
     {
-        auto ret = *visit(ctx->arglist()).as<std::shared_ptr<std::vector<Any>>>();
-        bool b = ret[0].is<sjtu::funcArg>();
+        auto ret = visit(ctx->arglist()).as<std::shared_ptr<anyV_t>>();
+        bool b = ret->operator[](0).is<sjtu::funcArg>();
         return ret;
     }
 
-    virtual antlrcpp::Any visitAtom(Python3Parser::AtomContext *ctx) 
+    antlrcpp::Any visitAtom(Python3Parser::AtomContext *ctx) override 
     {
         if (program.checkIsName) {
             if (ctx->NAME() != nullptr) {
@@ -665,24 +667,23 @@ public:
         }
     }
 
-    virtual antlrcpp::Any visitTestlist(Python3Parser::TestlistContext *ctx) 
+    antlrcpp::Any visitTestlist(Python3Parser::TestlistContext *ctx) override 
     {
-        std::vector<antlrcpp::Any> ret(ctx->test().size());
+        auto ret = std::make_shared<anyV_t>(anyV_t(ctx->test().size()));
         size_t i = 0;
         Any result;
         for (auto testEle : ctx->test()) {
-            ret[i++] = visit(testEle);
+            ret->operator[](i++) = visit(testEle);
         }
-        return std::make_shared<std::vector<antlrcpp::Any>>(ret);
+        return ret;
     }
 
-    virtual antlrcpp::Any visitArglist(Python3Parser::ArglistContext *ctx) 
+    antlrcpp::Any visitArglist(Python3Parser::ArglistContext *ctx) override 
     {
         auto args = ctx->argument();
         size_t i = 0;
         bool isPositional = false;
-        auto ret = std::make_shared<std::vector<Any>>(std::vector<Any>(args.size()));
-        //std::vector<Any> ret(args.size());
+        auto ret = std::make_shared<anyV_t>(anyV_t(args.size()));
         for (auto arg : args) {
             ret->at(i) = visit(arg);
             if (ret->at(i).as<sjtu::funcArg>().type) isPositional = true;
@@ -696,7 +697,7 @@ public:
         return ret;
     }
 
-    virtual antlrcpp::Any visitArgument(Python3Parser::ArgumentContext *ctx) 
+    antlrcpp::Any visitArgument(Python3Parser::ArgumentContext *ctx) override 
     {
         auto tests = ctx->test();
         if (tests.size() == 1) {

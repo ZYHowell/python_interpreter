@@ -5,7 +5,7 @@
 #include "Evalvisitor.h"
 using namespace antlr4;
 int main(int argc, const char* argv[]){
-    const std::string filepath="../test_file/new.py";
+    const std::string filepath="./test_file/new.py";
     std::ifstream ifs;
     ifs.open(filepath);
     if (!ifs.good()) {
