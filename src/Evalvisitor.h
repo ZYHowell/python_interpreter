@@ -404,10 +404,11 @@ public:
     antlrcpp::Any visitAnd_test(Python3Parser::And_testContext *ctx) override 
     {
         if (ctx->not_test().size() == 1) {
-            auto ret = visit(ctx->not_test(0));
-            bool b = ret.is<std::string>();
-            auto it = ret.as<std::string>();
-            return ret;
+            // auto ret = visit(ctx->not_test(0));
+            // bool b = ret.is<std::string>();
+            // auto it = ret.as<std::string>();
+            // return ret;
+            return visit(ctx->not_test(0));
         } else {
             if (program.checkIsName) {
                 //err
@@ -428,10 +429,11 @@ public:
             }
             return !toBool(visit(ctx->not_test()));
         } else {
-            auto ret = visit(ctx->comparison());
-            bool b = ret.is<std::string>();
-            auto it = ret.as<std::string>();
-            return ret;
+            // auto ret = visit(ctx->comparison());
+            // bool b = ret.is<std::string>();
+            // auto it = ret.as<std::string>();
+            // return ret;
+            return visit(ctx->comparison());
         }
     }
 
@@ -444,8 +446,8 @@ public:
         expre[0] = visit(ctx->arith_expr(num));
         auto comp_op = ctx->comp_op();
         if (!comp_op.size()){
-            bool b = expre[0].is<std::string>();
-            auto it = expre[0].as<std::string>();
+            // bool b = expre[0].is<std::string>();
+            // auto it = expre[0].as<std::string>();
             return expre[0];
         }
         if (program.checkIsName) {
@@ -455,23 +457,23 @@ public:
             expre[!fir] = visit(ctx->arith_expr(++num));
             //since NONE and STRING type, the comparisons are improved and packed
             if (op->LESS_THAN() != nullptr){
-                if (lessThan(expre[fir], expre[!fir]))
+                if (!lessThan(expre[fir], expre[!fir]))
                     return false;
             }
             else if (op->GREATER_THAN() != nullptr) {
-                if (greaterThan(expre[fir], expre[!fir]))
+                if (!greaterThan(expre[fir], expre[!fir]))
                     return false;
             }
             else if (op->EQUALS() != nullptr) {
-                if (equals(expre[fir], expre[!fir]))
+                if (!equals(expre[fir], expre[!fir]))
                     return false;
             }
             else if (op->GT_EQ() != nullptr) {
-                if (gtEq(expre[fir], expre[!fir]))
+                if (!gtEq(expre[fir], expre[!fir]))
                     return false;
             }
             else{
-                if (lsEq(expre[fir], expre[!fir]))
+                if (!lsEq(expre[fir], expre[!fir]))
                     return false;
             }
             fir = !fir;
@@ -613,7 +615,7 @@ public:
             } else {
                 std::string funcName = ctx->atom()->NAME()->toString();
                 auto paraNum = visit(ctx->trailer()).as<std::shared_ptr<anyV_t>>();
-                bool b = paraNum->operator[](0).is<sjtu::funcArg>();
+                //bool b = paraNum->operator[](0).is<sjtu::funcArg>();
                 if (funcName == "print") {
                     printVector(*paraNum);
                     std::cout << std::endl;
