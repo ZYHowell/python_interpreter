@@ -22,6 +22,7 @@ namespace sjtu
         }
     };
 
+    class Cpp_is_rubbish : public exception{};
 
     class index_out_of_bound : public exception {};
 
@@ -47,8 +48,10 @@ namespace sjtu
         std::string name;
         antlrcpp::Any value;
         bool type;
-        funcArg(const antlrcpp::Any &val = antlrcpp::Any(), bool tp = 0, std::string n = ""):
-            value(val), type(tp), name(n) {}
+        funcArg(antlrcpp::Any&& val = antlrcpp::Any(), bool tp = 0, std::string n = ""):
+        type(tp), name(n) {
+            value = val;
+        }
     };
 }
 

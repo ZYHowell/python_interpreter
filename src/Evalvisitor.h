@@ -440,16 +440,15 @@ public:
 
     antlrcpp::Any visitComparison(Python3Parser::ComparisonContext *ctx) override 
     {
+        auto comp_op = ctx->comp_op();
+        if (!comp_op.size()) {
+            return visit(ctx->arith_expr(0));
+        }
+
         Any expre[2];
         size_t num = 0;
         bool fir = 0;
         expre[0] = visit(ctx->arith_expr(num));
-        auto comp_op = ctx->comp_op();
-        if (!comp_op.size()){
-            // bool b = expre[0].is<std::string>();
-            // auto it = expre[0].as<std::string>();
-            return expre[0];
-        }
         if (program.checkIsName) {
             //err
         }
@@ -706,6 +705,7 @@ public:
         auto ret = std::make_shared<anyV_t>(anyV_t(args.size()));
         for (auto arg : args) {
             ret->at(i) = visit(arg);
+            auto it = ret->at(i).as<sjtu::funcArg>();
             if (ret->at(i).as<sjtu::funcArg>().type) isPositional = true;
             else if (isPositional) {
                 //err
@@ -722,7 +722,8 @@ public:
         if (tests.size() == 1) {
             return sjtu::funcArg(visit(tests[0]));
         } else {
-            return sjtu::funcArg(visit(tests[1]), 1, visit(tests[0]).as<std::string>());
+            auto ret = visit(tests[0]);
+            return sjtu::funcArg(visit(tests[1]), 1, ret.as<std::string>());
         }
     }
 };
