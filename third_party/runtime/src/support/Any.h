@@ -132,9 +132,8 @@ private:
 
     template<int N = 0, typename std::enable_if<N == N && !std::is_copy_constructible<T>::value, int>::type = 0>
     Base* clone() const {
-      std::cout << "sorry, but c++ is stupid so it failed in Any.h line 131" << std::endl;
-      std::cout.flush();
-      exit(1);
+        class NotConstructible :public std::exception{};
+        throw NotConstructible();
       return nullptr;
     }
 
