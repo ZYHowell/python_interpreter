@@ -6,11 +6,18 @@
 #include "Program.h"
 #include "exceptions.h"
 class EvalVisitor: public Python3BaseVisitor {
+
 private:
     using Any = antlrcpp::Any;
     using anyV_t = std::vector<Any>;
     Program program;
+
 public:
+
+    /*
+     * Judge if it is a list.
+     * Always followed by an exception.
+    */
     inline bool isList(const Any &it)
     {
         return (it.is<std::shared_ptr<anyV_t>>() || 
@@ -18,13 +25,14 @@ public:
                 );
     }
 
-
     inline size_t getNodeIndex(antlr4::tree::TerminalNode* it)
     {
         return it->getSymbol()->getTokenIndex();
     }
 
-
+    /*
+     * Tramsformations which need to be overrided when super-long int is introduced in.
+    */
     inline int toInt(const Any &it)
     {
         if (isList(it)) {
@@ -52,7 +60,9 @@ public:
         } else return it.as<int>();
     }
 
-
+    /*
+     * Throw an exception when the type cannot translate to a int-like form.
+    */
     inline void checkType(const Any &a, const Any &b)
     {
         if (b.is<sjtu::none_t>()) {
@@ -65,7 +75,9 @@ public:
         return;
     }
 
-
+    /*
+     * Comparisons(include string comparison)
+    */
     inline bool lessThan(const Any &a, const Any &b)
     {
         checkType(a, b);
@@ -112,7 +124,10 @@ public:
         }
     }
 
-
+    /*
+     * Make the return of a suite clear
+     * (mainly for a return of a break_stmt and continue_stmt)
+    */
     inline antlrcpp::Any judgeSuite(const Any &it) 
     {
         if (it.is<sjtu::flowRet>()) {
@@ -122,6 +137,10 @@ public:
         return sjtu::none_t();
     }
 
+    /*
+     * The following two functions are used to deal with the print function, 
+     * which supports printing a turple of turples and other elements.
+    */
     void printEle(const Any &it)
     {
         if (it.is<bool>()) {
@@ -160,6 +179,9 @@ public:
         }
     }
 
+    /*
+     * Visit each statements
+    */
     antlrcpp::Any visitFile_input(Python3Parser::File_inputContext *ctx) override 
     {
         Any ret;
@@ -241,6 +263,9 @@ public:
         auto result = *visit(ctx->testlist(ctx->testlist().size() - 1)).as<std::shared_ptr<anyV_t>>();
         
         if (ctx->augassign() != nullptr) {
+            
+            //To deal with augassignment statement.
+
             program.checkIsName = true;
             auto testEle = *visit(ctx->testlist(0)).as<std::shared_ptr<anyV_t>>();
             program.checkIsName = false;
@@ -261,8 +286,12 @@ public:
             }
 
         } else if (ctx->ASSIGN().size()){
+
+            //To deal with assignment statement. 
+
             anyV_t contents;
             program.checkIsName = true;
+            //Since all lvalues are namelists
             size_t m = ctx->testlist().size();
             for (size_t i = 0;i < ctx->testlist().size() - 1;++i) {
 
@@ -270,7 +299,7 @@ public:
 
 
                 if (contents.size() != result.size()) {
-                    //err
+                    //err occurs like a,b = 1,2,3
                 } else {
                     for (size_t j = 0;j < contents.size();++j) {
                         *(contents.at(j).as<Any*>()) = result[j];
@@ -284,6 +313,7 @@ public:
 
     antlrcpp::Any visitAugassign(Python3Parser::AugassignContext *ctx) override 
     {
+        //No need to visit augassign in this version
         return visitChildren(ctx);
     }
 
@@ -310,7 +340,12 @@ public:
 
     antlrcpp::Any visitReturn_stmt(Python3Parser::Return_stmtContext *ctx) override 
     {
-        return sjtu::flowRet(3, visit(ctx->testlist()));
+        auto ret = visit(ctx->testlist()).as<std::shared_ptr<anyV_t>>();
+        if (ret->size() == 1) {
+            return sjtu::flowRet(3, ret->operator[](0));
+        } else {
+            return sjtu::flowRet(3, ret);
+        }
     }
 
     antlrcpp::Any visitCompound_stmt(Python3Parser::Compound_stmtContext *ctx) override 
@@ -332,6 +367,7 @@ public:
         } else {
             for (size_t i = 0;i < ctx->ELIF().size();++i) {
                 if ( toBool( visit(ctx->test(1 + i)) ) ) {
+                    //break, continue and return should be reversed instead of unpacking
                     return visit(ctx->suite(1 + i));
                 }
             }
@@ -374,6 +410,9 @@ public:
         e.g.: def a(): break
         Maybe a stack to record avaliable while_stmt in this function?
         Or, solve it in higher level? like where to use suite?
+
+        I think it should be solved in higher level, 
+        so every visit(ctx->suite()) should be checked twice.
     */ 
                 } else ++current;
             }
@@ -383,7 +422,12 @@ public:
 
     antlrcpp::Any visitTest(Python3Parser::TestContext *ctx) override 
     {
-        return visit(ctx->or_test());
+        auto ret = visit(ctx->or_test());
+        if (!program.frames.empty()){
+            size_t number = program.frames.top().memory->size();
+            size_t u = 1;
+        }
+        return ret;
     }
     antlrcpp::Any visitOr_test(Python3Parser::Or_testContext *ctx) override 
     {
@@ -408,6 +452,7 @@ public:
             // bool b = ret.is<std::string>();
             // auto it = ret.as<std::string>();
             // return ret;
+            //use for debug
             return visit(ctx->not_test(0));
         } else {
             if (program.checkIsName) {
@@ -613,44 +658,93 @@ public:
                 //err
             } else {
                 std::string funcName = ctx->atom()->NAME()->toString();
-                auto paraNum = visit(ctx->trailer()).as<std::shared_ptr<anyV_t>>();
-                //bool b = paraNum->operator[](0).is<sjtu::funcArg>();
+                auto paras = *visit(ctx->trailer()).as<std::shared_ptr<anyV_t>>();
+
                 if (funcName == "print") {
-                    printVector(*paraNum);
+                    printVector(paras);
                     std::cout << std::endl;
                     return sjtu::none_t();
                 }
+                
                 if (!program.funcs.count(funcName)) {
                     //err
                 }
+                
                 Function *func = &program.funcs[funcName];
                 //needs to be improved since it is slow.
                 program.frames.push(Frame());
-                std::map<std::string, antlrcpp::Any> *mem = program.frames.top().memory;
-                size_t num = func->params.size();
-                for (size_t i = 0;i < num;++i) {
-                    //mem->at((func->params[i]).name) = paraNum->operator[]();
-                    //needs to be improved
-                }
                 
-                auto ret = visit(func->suite);
-                if (ret.is<sjtu::flowRet>() && ret.as<sjtu::flowRet>().type != 3) {
-                    //err like: def a(): break/continue
+                std::map<std::string, antlrcpp::Any> *mem = program.frames.top().memory;
+                
+                size_t number;//use for debug
+                
+                size_t funcNum = func->params.size();
+                size_t paraNum = paras.size();
+
+                bool isPositional = false;
+                std::string nowName;
+
+                size_t nowFunc = 0;
+                //assign now
+                for (size_t i = 0;i < paraNum;++i) {
+                    if (isPositional || paras[i].as<sjtu::funcArg>().type) {
+                        isPositional = true;
+                        nowName = paras[i].as<sjtu::funcArg>().name;
+                    } else {
+                        nowName = (func->params)[nowFunc++].name;
+                    }
+                    if (mem->count(nowName)) {
+                        //err
+                    } else {
+                        mem->insert(std::pair<std::string, Any>
+                                        (nowName, paras[i].as<sjtu::funcArg>().value));
+                    }
                 }
+                //check now
+                for (size_t i = 0;i < funcNum;++i) {
+                    nowName = func->params[i].name;
+                    if (!mem->count(nowName)) {
+                        if (func->params[i].type) {
+                            mem->insert(std::pair<std::string, Any>
+                                            (nowName, func->params[i].value));
+                        } else {
+                            //err
+                        }
+                    }
+                }
+
+                auto ret = visit(func->suite);
+
+                number = mem->size();
+
                 program.frames.pop();
 
-                return judgeSuite(ret);
+                if (ret.is<sjtu::flowRet>()) {
+                    if (ret.as<sjtu::flowRet>().type != 3) {
+                    //err like: def a(): break/continue
+                    } else {
+                        return ret.as<sjtu::flowRet>().retValue;        
+                    }
+                } else if (ret.is<sjtu::none_t>()){
+                    return ret;
+                } else {
+                    //err
+                }
             }
         } else {
-            Any ret = visit(ctx->atom());
+            Any ret = visit(ctx->atom());//define for debug
             return ret;
         }
     }
 
     antlrcpp::Any visitTrailer(Python3Parser::TrailerContext *ctx) override 
     {
-        auto ret = visit(ctx->arglist()).as<std::shared_ptr<anyV_t>>();
-        return ret;
+        if (ctx->arglist() != nullptr) {
+            auto ret = visit(ctx->arglist()).as<std::shared_ptr<anyV_t>>();
+            return ret;
+        } else {
+            return std::make_shared<anyV_t>(anyV_t());
+        }
     }
 
     antlrcpp::Any visitAtom(Python3Parser::AtomContext *ctx) override 
@@ -665,16 +759,21 @@ public:
         }
         if (ctx->NUMBER() != nullptr){
             //this version do not support superlong caculation and double
-            int ret = std::atoi(ctx->NUMBER()->toString().c_str());
+            int ret = std::atoi(ctx->NUMBER()->toString().c_str());//use for debug, can simplify
             return ret;
         } else if (ctx->NAME() != nullptr) {
             std::string name = ctx->NAME()->toString();
             return *program.getValue(name);
             //no need to return name if checkIsName=false
         } else if (ctx->STRING().size() != 0) {
-            std::string ret = "";
+            std::string tmp = "";
+            size_t num = ctx->STRING().size();
             for (auto &str : ctx->STRING()) {
-                ret += str->toString();
+                tmp += str->toString();
+            }
+            std::string ret = "";
+            for (size_t i = 1;i < tmp.size() - 1;++i) {
+                ret += tmp[i];
             }
             return ret;
         } else if (ctx->NONE() != nullptr) {
@@ -693,6 +792,14 @@ public:
         Any result;
         for (auto testEle : ctx->test()) {
             ret->operator[](i++) = visit(testEle);
+            if (!program.frames.empty()){
+                size_t number = program.frames.top().memory->size();
+                size_t u = 1;
+            }
+        }
+        if (!program.frames.empty()){
+            size_t number = program.frames.top().memory->size();
+            size_t i = 1;
         }
         return ret;
     }
@@ -703,9 +810,16 @@ public:
         size_t i = 0;
         bool isPositional = false;
         auto ret = std::make_shared<anyV_t>(anyV_t(args.size()));
+
+        if (!args.size()) {
+            return std::make_shared<anyV_t>(anyV_t());
+        }
+
         for (auto arg : args) {
             ret->at(i) = visit(arg);
             auto it = ret->at(i).as<sjtu::funcArg>();
+            bool b = it.value.is<anyV_t>();
+            //bool eleb = it.value.as<anyV_t>()[0].is<int>();
             if (ret->at(i).as<sjtu::funcArg>().type) isPositional = true;
             else if (isPositional) {
                 //err
@@ -720,7 +834,14 @@ public:
     {
         auto tests = ctx->test();
         if (tests.size() == 1) {
-            return sjtu::funcArg(visit(tests[0]));
+            auto ret = sjtu::funcArg(visit(tests[0]));
+            bool b = ret.value.is<std::shared_ptr<anyV_t>>();
+            if (b){
+                auto it = *ret.value.as<std::shared_ptr<anyV_t>>();
+                b = it[0].is<int>();
+            }
+                
+            return ret;
         } else {
             auto ret = visit(tests[0]);
             return sjtu::funcArg(visit(tests[1]), 1, ret.as<std::string>());
