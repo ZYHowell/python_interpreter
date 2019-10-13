@@ -155,9 +155,9 @@ public:
             std::cout << it.as<std::string>();
         } else if (it.is<sjtu::none_t>()) {
             std::cout << "None";
-        } else if (it.is<anyV_t>()) {
+        } else if (it.is<std::shared_ptr<anyV_t>>()) {
             std::cout << "(";
-            printVector(it.as<anyV_t>());
+            printVector(*it.as<std::shared_ptr<anyV_t>>());
             std::cout << ")";
         }
     }
@@ -422,12 +422,7 @@ public:
 
     antlrcpp::Any visitTest(Python3Parser::TestContext *ctx) override 
     {
-        auto ret = visit(ctx->or_test());
-        if (!program.frames.empty()){
-            size_t number = program.frames.top().memory->size();
-            size_t u = 1;
-        }
-        return ret;
+        return visit(ctx->or_test());
     }
     antlrcpp::Any visitOr_test(Python3Parser::Or_testContext *ctx) override 
     {
@@ -448,11 +443,6 @@ public:
     antlrcpp::Any visitAnd_test(Python3Parser::And_testContext *ctx) override 
     {
         if (ctx->not_test().size() == 1) {
-            // auto ret = visit(ctx->not_test(0));
-            // bool b = ret.is<std::string>();
-            // auto it = ret.as<std::string>();
-            // return ret;
-            //use for debug
             return visit(ctx->not_test(0));
         } else {
             if (program.checkIsName) {
@@ -474,10 +464,6 @@ public:
             }
             return !toBool(visit(ctx->not_test()));
         } else {
-            // auto ret = visit(ctx->comparison());
-            // bool b = ret.is<std::string>();
-            // auto it = ret.as<std::string>();
-            // return ret;
             return visit(ctx->comparison());
         }
     }
@@ -674,9 +660,7 @@ public:
                 //needs to be improved since it is slow.
                 program.frames.push(Frame());
                 
-                std::map<std::string, antlrcpp::Any> *mem = program.frames.top().memory;
-                
-                size_t number;//use for debug
+                std::map<std::string, antlrcpp::Any> *mem = &program.frames.top().memory;
                 
                 size_t funcNum = func->params.size();
                 size_t paraNum = paras.size();
@@ -715,8 +699,6 @@ public:
 
                 auto ret = visit(func->suite);
 
-                number = mem->size();
-
                 program.frames.pop();
 
                 if (ret.is<sjtu::flowRet>()) {
@@ -732,16 +714,14 @@ public:
                 }
             }
         } else {
-            Any ret = visit(ctx->atom());//define for debug
-            return ret;
+            return visit(ctx->atom());
         }
     }
 
     antlrcpp::Any visitTrailer(Python3Parser::TrailerContext *ctx) override 
     {
         if (ctx->arglist() != nullptr) {
-            auto ret = visit(ctx->arglist()).as<std::shared_ptr<anyV_t>>();
-            return ret;
+            return visit(ctx->arglist()).as<std::shared_ptr<anyV_t>>();
         } else {
             return std::make_shared<anyV_t>(anyV_t());
         }
@@ -759,8 +739,7 @@ public:
         }
         if (ctx->NUMBER() != nullptr){
             //this version do not support superlong caculation and double
-            int ret = std::atoi(ctx->NUMBER()->toString().c_str());//use for debug, can simplify
-            return ret;
+            return std::atoi(ctx->NUMBER()->toString().c_str());
         } else if (ctx->NAME() != nullptr) {
             std::string name = ctx->NAME()->toString();
             return *program.getValue(name);
@@ -792,14 +771,6 @@ public:
         Any result;
         for (auto testEle : ctx->test()) {
             ret->operator[](i++) = visit(testEle);
-            if (!program.frames.empty()){
-                size_t number = program.frames.top().memory->size();
-                size_t u = 1;
-            }
-        }
-        if (!program.frames.empty()){
-            size_t number = program.frames.top().memory->size();
-            size_t i = 1;
         }
         return ret;
     }
@@ -817,9 +788,6 @@ public:
 
         for (auto arg : args) {
             ret->at(i) = visit(arg);
-            auto it = ret->at(i).as<sjtu::funcArg>();
-            bool b = it.value.is<anyV_t>();
-            //bool eleb = it.value.as<anyV_t>()[0].is<int>();
             if (ret->at(i).as<sjtu::funcArg>().type) isPositional = true;
             else if (isPositional) {
                 //err
@@ -834,14 +802,7 @@ public:
     {
         auto tests = ctx->test();
         if (tests.size() == 1) {
-            auto ret = sjtu::funcArg(visit(tests[0]));
-            bool b = ret.value.is<std::shared_ptr<anyV_t>>();
-            if (b){
-                auto it = *ret.value.as<std::shared_ptr<anyV_t>>();
-                b = it[0].is<int>();
-            }
-                
-            return ret;
+            return sjtu::funcArg(visit(tests[0]));
         } else {
             auto ret = visit(tests[0]);
             return sjtu::funcArg(visit(tests[1]), 1, ret.as<std::string>());
