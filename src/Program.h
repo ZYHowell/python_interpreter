@@ -9,15 +9,15 @@
 
 struct Frame 
 {
-    std::map<std::string,antlrcpp::Any> *memory;
+    std::map<std::string,antlrcpp::Any> memory;
     antlr4::tree::ParseTree* returnnode;
     Frame()
     {
-        memory = new std::map<std::string, antlrcpp::Any>;
+        
     }
     ~Frame()
     {
-        delete memory;
+      
     }
 };
 
@@ -46,14 +46,14 @@ public:
     antlrcpp::Any* getValue(std::string name)
     {
         if (!frames.empty()) {
-            if (frames.top().memory->count(name))
-                return &(frames.top().memory->at(name));
-            else if (global.memory->count(name))
-                return &(global.memory->at(name));
+            if (frames.top().memory.count(name))
+                return &(frames.top().memory.at(name));
+            else if (global.memory.count(name))
+                return &(global.memory.at(name));
             else {
                 if (checkIsName) {
-                    frames.top().memory->insert(make_pair(name, Any()));
-                    return &(frames.top().memory->at(name));
+                    frames.top().memory.insert(make_pair(name, Any()));
+                    return &(frames.top().memory.at(name));
                 }
                 else {
                     //err
@@ -61,12 +61,12 @@ public:
             }  
         }
         else {
-            if (global.memory->count(name))
-                return &(global.memory->at(name));
+            if (global.memory.count(name))
+                return &(global.memory.at(name));
             else {
                 if (checkIsName) {
-                    global.memory->insert(make_pair(name, Any()));
-                    return &(global.memory->at(name));
+                    global.memory.insert(make_pair(name, Any()));
+                    return &(global.memory.at(name));
                 }
                 else {
                     //err

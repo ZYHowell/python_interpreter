@@ -424,7 +424,7 @@ public:
     {
         auto ret = visit(ctx->or_test());
         if (!program.frames.empty()){
-            size_t number = program.frames.top().memory->size();
+            size_t number = program.frames.top().memory.size();
             size_t u = 1;
         }
         return ret;
@@ -674,7 +674,7 @@ public:
                 //needs to be improved since it is slow.
                 program.frames.push(Frame());
                 
-                std::map<std::string, antlrcpp::Any> *mem = program.frames.top().memory;
+                std::map<std::string, antlrcpp::Any> &mem = program.frames.top().memory;
                 
                 size_t number;//use for debug
                 
@@ -693,19 +693,19 @@ public:
                     } else {
                         nowName = (func->params)[nowFunc++].name;
                     }
-                    if (mem->count(nowName)) {
+                    if (mem.count(nowName)) {
                         //err
                     } else {
-                        mem->insert(std::pair<std::string, Any>
+                        mem.insert(std::pair<std::string, Any>
                                         (nowName, paras[i].as<sjtu::funcArg>().value));
                     }
                 }
                 //check now
                 for (size_t i = 0;i < funcNum;++i) {
                     nowName = func->params[i].name;
-                    if (!mem->count(nowName)) {
+                    if (!mem.count(nowName)) {
                         if (func->params[i].type) {
-                            mem->insert(std::pair<std::string, Any>
+                            mem.insert(std::pair<std::string, Any>
                                             (nowName, func->params[i].value));
                         } else {
                             //err
@@ -715,7 +715,7 @@ public:
 
                 auto ret = visit(func->suite);
 
-                number = mem->size();
+                number = mem.size();
 
                 program.frames.pop();
 
@@ -793,12 +793,12 @@ public:
         for (auto testEle : ctx->test()) {
             ret->operator[](i++) = visit(testEle);
             if (!program.frames.empty()){
-                size_t number = program.frames.top().memory->size();
+                size_t number = program.frames.top().memory.size();
                 size_t u = 1;
             }
         }
         if (!program.frames.empty()){
-            size_t number = program.frames.top().memory->size();
+            size_t number = program.frames.top().memory.size();
             size_t i = 1;
         }
         return ret;
