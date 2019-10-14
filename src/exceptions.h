@@ -22,6 +22,7 @@ namespace sjtu
         }
     };
 
+    class Cpp_is_rubbish : public exception{};
 
     class index_out_of_bound : public exception {};
 
@@ -33,12 +34,11 @@ namespace sjtu
 
     class flowRet 
     {
-        using Any = antlrcpp::Any;
     public:
         int type;
         //1 for break, 2 for continue and 3 for return
         antlrcpp::Any retValue;
-        flowRet(int tp = 0, Any ret = Any()): type(tp), retValue(ret){}
+        flowRet(int tp = 0, antlrcpp::Any ret = antlrcpp::Any()): type(tp), retValue(ret){}
         ~flowRet() {}
     };
     class none_t{};
@@ -47,8 +47,9 @@ namespace sjtu
         std::string name;
         antlrcpp::Any value;
         bool type;
-        funcArg(antlrcpp::Any &val, bool tp = 0, std::string n = ""):
-            value(val), type(tp), name(n) {}
+        funcArg(antlrcpp::Any&& val = antlrcpp::Any(), bool tp = 0, std::string n = ""):
+        value(val), type(tp), name(n) {
+        }
     };
 }
 

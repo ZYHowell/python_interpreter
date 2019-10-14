@@ -9,44 +9,65 @@
 
 struct Frame 
 {
-    std::map<std::string,antlrcpp::Any> *memory;
-    antlr4::tree::ParseTree* returnnode;
-    Frame()
-    {
-        memory = new std::map<std::string, antlrcpp::Any>;
-    }
-    ~Frame()
-    {
-        delete memory;
-    }
+    std::map<std::string,antlrcpp::Any> memory;
+    Frame():memory(){}
+    ~Frame(){}
 };
 
 struct Function 
 {
     antlr4::tree::ParseTree* suite;
     //really a parseTree? or a SuiteContext?
-    std::vector<std::string> params;///暂时不支持默认参数
+    std::vector<sjtu::funcArg> params;
 public:
     Function(antlr4::tree::ParseTree* tree, 
-             std::vector<std::string> &params)
+             std::vector<sjtu::funcArg> &params)
              :suite(tree),params(params){}
+    Function(){}
 };
 
 class Program 
 {
     using Any = antlrcpp::Any;
-    std::stack<Frame> tmp_frames;
-    bool checkIsName;
 public:
+    bool checkIsName;
     std::stack<Frame> frames;
     std::map<std::string,Function> funcs;
+    Frame global;
 public:
-    Any *getValue(std::string name);
-};
-
-class ERRORS 
-{
-    
+    Program():checkIsName(false), frames(), funcs(), global(){}
+    antlrcpp::Any* getValue(std::string name)
+    {
+        if (!frames.empty()) {
+            if (frames.top().memory.count(name))
+                return &(frames.top().memory.at(name));
+            else if (global.memory.count(name))
+                return &(global.memory.at(name));
+            else {
+                if (checkIsName) {
+                    frames.top().memory.insert(make_pair(name, Any()));
+                    return &(frames.top().memory.at(name));
+                }
+                else {
+                    //err
+                }
+            }  
+        }
+        else {
+            if (global.memory.count(name))
+                return &(global.memory.at(name));
+            else {
+                if (checkIsName) {
+                    global.memory.insert(make_pair(name, Any()));
+                    return &(global.memory.at(name));
+                }
+                else {
+                    //err
+                }    
+            }
+        }
+        return nullptr;
+    }
 };
 
 
