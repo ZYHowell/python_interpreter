@@ -1,0 +1,4 @@
+a = 1
+A = True
+b = A
+print(b)
