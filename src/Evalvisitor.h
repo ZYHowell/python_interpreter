@@ -5,6 +5,8 @@
 #include "Python3BaseVisitor.h"
 #include "Program.h"
 #include "exceptions.h"
+#include "bigint.h"
+
 class EvalVisitor: public Python3BaseVisitor {
 
 private:
@@ -30,22 +32,74 @@ public:
         return it->getSymbol()->getTokenIndex();
     }
 
+	/* opcode
+	 * 0 +
+	 * 1 -
+	 * 2 *
+	 * 3 /
+	 */
+	antlrcpp::Any op(antlrcpp::Any a, antlrcpp::Any b, int opcode) {
+		if (a.is<std::string>() && b.is<std::string>()) {
+			if (opcode == 0)
+				return a.as<std::string>() + b.as<std::string>();
+			else {
+				//err
+			}
+			assert(opcode == 0);
+		}
+		else if ((a.is<double>() || a.is<BigInt>() || a.is<bool>()) &&
+				 (b.is<double>() || b.is<BigInt>() || b.is<bool>())) {
+			if (a.is<double>() || b.is<double>()) {
+				double da, db;
+				if (a.is<double>())
+					da = a.as<double>();
+				else if (a.is<BigInt>())
+					da = (a.as<BigInt>()).to_double();
+				else
+					da = a.as<bool>() * 1.0;
+				if (b.is<double>())
+					db = b.as<double>();
+				else if (b.is<BigInt>())
+					db = b.as<BigInt>().to_double();
+				else
+					db = b.as<bool>() * 1.0;
+				if (opcode == 0)
+					return da + db;
+				else if (opcode == 1)
+					return da - db;
+				else if (opcode == 2)
+					return da * db;
+				else if (opcode == 3)
+					return da / db;
+			}
+			else {
+				BigInt da, db;
+				if (a.is<BigInt>())
+					da = a.as<BigInt>();
+				else
+					da = int(a.as<bool>());
+				if (b.is<BigInt>())
+					db = b.as<BigInt>();
+				else
+					db = int(b.as<bool>());
+				if (opcode == 0)
+					return da + db;
+				else if (opcode == 1)
+					return da - db;
+				else if (opcode == 2)
+					return da * db;
+				else if (opcode == 3)
+					return da.to_double() / db.to_double();
+			}
+		}
+		else {
+			// err
+		}
+	}
+
     /*
      * Tramsformations which need to be overrided when super-long int is introduced in.
     */
-    inline int toInt(const Any &it)
-    {
-        if (isList(it)) {
-            //err
-        }
-        if (it.is<std::string>() || it.is<sjtu::none_t>()) {
-            //err
-        } else if (it.is<bool>()) {
-            return it.as<bool>();
-        } else if (it.is<int>()) {
-            return it.as<int>();
-        }
-    }
     inline bool toBool(const Any &it)
     {
         if (isList(it)) {
@@ -57,22 +111,10 @@ public:
             return false;
         } else if (it.is<bool>()) {
             return it.as<bool>();
-        } else return it.as<int>();
-    }
-
-    /*
-     * Throw an exception when the type cannot translate to a int-like form.
-    */
-    inline void checkType(const Any &a, const Any &b)
-    {
-        if (b.is<sjtu::none_t>()) {
-            //err
-        }
-        if ((a.is<std::string>() && !b.is<std::string>()) ||
-            !a.is<std::string>() && b.is<std::string>()) {
-            //err
-        }
-        return;
+        } else if (it.is<BigInt>()) {
+			return it.as<BigInt>() == BigInt();
+		} else if (it.is<double>())
+			return it.as<double>() == 0.0;
     }
 
     /*
@@ -80,48 +122,203 @@ public:
     */
     inline bool lessThan(const Any &a, const Any &b)
     {
-        checkType(a, b);
-        if (a.is<std::string>()) {
+        if (a.is<std::string>() && b.is<std::string>()) {
             return a.as<std::string>() < b.as<std::string>();
-        } else {
-            return toInt(a) < toInt(b);
+        }
+        else if ((a.is<double>() || a.is<BigInt>() || a.is<bool>()) &&
+        		 (b.is<double>() || b.is<BigInt>() || b.is<bool>())) {
+			if (a.is<double>() || b.is<double>()) {
+				double da, db;
+				if (a.is<double>())
+					da = a.as<double>();
+				else if (a.is<BigInt>())
+					da = (a.as<BigInt>()).to_double();
+				else
+					da = a.as<bool>() * 1.0;
+				if (b.is<double>())
+					db = b.as<double>();
+				else if (b.is<BigInt>())
+					db = b.as<BigInt>().to_double();
+				else
+					db = b.as<bool>() * 1.0;
+				return da < db;
+			}
+			else {
+				BigInt da, db;
+				if (a.is<BigInt>())
+					da = a.as<BigInt>();
+				else
+					da = int(a.as<bool>());
+				if (b.is<BigInt>())
+					db = b.as<BigInt>();
+				else
+					db = int(b.as<bool>());
+				return da < db;
+			}
+        }
+        else {
+        	// err
         }
     }
     inline bool greaterThan(const Any &a, const Any &b)
     {
-        checkType(a, b);
-        if (a.is<std::string>()) {
-            return a.as<std::string>() > b.as<std::string>();
-        } else {
-            return toInt(a) > toInt(b);
-        }
+		if (a.is<std::string>() && b.is<std::string>()) {
+			return a.as<std::string>() > b.as<std::string>();
+		}
+		else if ((a.is<double>() || a.is<BigInt>() || a.is<bool>()) &&
+				 (b.is<double>() || b.is<BigInt>() || b.is<bool>())) {
+			if (a.is<double>() || b.is<double>()) {
+				double da, db;
+				if (a.is<double>())
+					da = a.as<double>();
+				else if (a.is<BigInt>())
+					da = (a.as<BigInt>()).to_double();
+				else
+					da = a.as<bool>() * 1.0;
+				if (b.is<double>())
+					db = b.as<double>();
+				else if (b.is<BigInt>())
+					db = b.as<BigInt>().to_double();
+				else
+					db = b.as<bool>() * 1.0;
+				return da > db;
+			}
+			else {
+				BigInt da, db;
+				if (a.is<BigInt>())
+					da = a.as<BigInt>();
+				else
+					da = int(a.as<bool>());
+				if (b.is<BigInt>())
+					db = b.as<BigInt>();
+				else
+					db = int(b.as<bool>());
+				return da > db;
+			}
+		}
+		else {
+			// err
+		}
     }
     inline bool equals(const Any &a, const Any &b)
     {
-        checkType(a, b);
-        if (a.is<std::string>()) {
-            return a.as<std::string>() == b.as<std::string>();
-        } else {
-            return toInt(a) == toInt(b);
-        }
+		if (a.is<std::string>() && b.is<std::string>()) {
+			return a.as<std::string>() == b.as<std::string>();
+		}
+		else if ((a.is<double>() || a.is<BigInt>() || a.is<bool>()) &&
+				 (b.is<double>() || b.is<BigInt>() || b.is<bool>())) {
+			if (a.is<double>() || b.is<double>()) {
+				double da, db;
+				if (a.is<double>())
+					da = a.as<double>();
+				else if (a.is<BigInt>())
+					da = (a.as<BigInt>()).to_double();
+				else
+					da = a.as<bool>() * 1.0;
+				if (b.is<double>())
+					db = b.as<double>();
+				else if (b.is<BigInt>())
+					db = b.as<BigInt>().to_double();
+				else
+					db = b.as<bool>() * 1.0;
+				return da == db;
+			}
+			else {
+				BigInt da, db;
+				if (a.is<BigInt>())
+					da = a.as<BigInt>();
+				else
+					da = int(a.as<bool>());
+				if (b.is<BigInt>())
+					db = b.as<BigInt>();
+				else
+					db = int(b.as<bool>());
+				return da == db;
+			}
+		}
+		else {
+			// err
+		}
     }
     inline bool gtEq(const Any &a, const Any &b)
     {
-        checkType(a, b);
-        if (a.is<std::string>()) {
-            return a.as<std::string>() >= b.as<std::string>();
-        } else {
-            return toInt(a) >= toInt(b);
-        }
+		if (a.is<std::string>() && b.is<std::string>()) {
+			return a.as<std::string>() >= b.as<std::string>();
+		}
+		else if ((a.is<double>() || a.is<BigInt>() || a.is<bool>()) &&
+				 (b.is<double>() || b.is<BigInt>() || b.is<bool>())) {
+			if (a.is<double>() || b.is<double>()) {
+				double da, db;
+				if (a.is<double>())
+					da = a.as<double>();
+				else if (a.is<BigInt>())
+					da = (a.as<BigInt>()).to_double();
+				else
+					da = a.as<bool>() * 1.0;
+				if (b.is<double>())
+					db = b.as<double>();
+				else if (b.is<BigInt>())
+					db = b.as<BigInt>().to_double();
+				else
+					db = b.as<bool>() * 1.0;
+				return da >= db;
+			}
+			else {
+				BigInt da, db;
+				if (a.is<BigInt>())
+					da = a.as<BigInt>();
+				else
+					da = int(a.as<bool>());
+				if (b.is<BigInt>())
+					db = b.as<BigInt>();
+				else
+					db = int(b.as<bool>());
+				return da >= db;
+			}
+		}
+		else {
+			// err
+		}
     }
     inline bool lsEq(const Any &a, const Any &b)
     {
-        checkType(a, b);
-        if (a.is<std::string>()) {
-            return a.as<std::string>() <= b.as<std::string>();
-        } else {
-            return toInt(a) <= toInt(b);
-        }
+		if (a.is<std::string>() && b.is<std::string>()) {
+			return a.as<std::string>() <= b.as<std::string>();
+		}
+		else if ((a.is<double>() || a.is<BigInt>() || a.is<bool>()) &&
+				 (b.is<double>() || b.is<BigInt>() || b.is<bool>())) {
+			if (a.is<double>() || b.is<double>()) {
+				double da, db;
+				if (a.is<double>())
+					da = a.as<double>();
+				else if (a.is<BigInt>())
+					da = (a.as<BigInt>()).to_double();
+				else
+					da = a.as<bool>() * 1.0;
+				if (b.is<double>())
+					db = b.as<double>();
+				else if (b.is<BigInt>())
+					db = b.as<BigInt>().to_double();
+				else
+					db = b.as<bool>() * 1.0;
+				return da <= db;
+			}
+			else {
+				BigInt da, db;
+				if (a.is<BigInt>())
+					da = a.as<BigInt>();
+				else
+					da = int(a.as<bool>());
+				if (b.is<BigInt>())
+					db = b.as<BigInt>();
+				else
+					db = int(b.as<bool>());
+				return da <= db;
+			}
+		}
+		else {
+			// err
+		}
     }
 
     /*
@@ -149,8 +346,10 @@ public:
             } else {
                 std::cout << "False";
             }
-        } else if (it.is<int>()) {
-            std::cout << it.as<int>();
+        } else if (it.is<double>()) {
+			std::cout << it.as<double>();
+		} else if (it.is<BigInt>()) {
+        	std::cout << it.as<BigInt>();
         } else if (it.is<std::string>()) {
             std::cout << it.as<std::string>();
         } else if (it.is<sjtu::none_t>()) {
@@ -275,13 +474,22 @@ public:
             }
             auto content = testEle[0].as<Any*>();
 
+            if (result[0].is<sjtu::none_t>()) {
+            	//err
+            }
+
+            //bool, double, BigInt, std:string
             if (ctx->augassign()->ADD_ASSIGN() != nullptr) {
+            	*content = op(*content, result, 0);
                 //*content += result;
             } else if (ctx->augassign()->SUB_ASSIGN() != nullptr) {
+				*content = op(*content, result, 1);
                 //*content -= result;
             } else if (ctx->augassign()->MULT_ASSIGN() != nullptr) {
+				*content = op(*content, result, 2);
                 //*content *= result;
             } else {
+				*content = op(*content, result, 3);
                 //*content /= result;
             }
 
@@ -527,48 +735,65 @@ public:
         if (num == 1) {
             return ret;
         }
-        
+
         if (program.checkIsName || ret.is<sjtu::none_t>()) {
             //err
         }
         if (isList(ret)) {
             //err
         }
-        if (ret.is<std::string>()) {
-            if (minusMax) {
-                //err
-            }
-            std::string result = ret.as<std::string>();
-            Any tmp;
-            for (size_t i = 1;i < num;++i) {
-                tmp = visit(ctx->term(i));
-                if (!tmp.is<std::string>()) {
-                    //err
-                }
-                result = result + tmp.as<std::string>();
-            }
-            return result;
-        }
-        
-        int result = toInt(ret);
-        int nex;
-        for (size_t i = 1;i < num;++i) {
-            nex = toInt(visit(ctx->term(i)));
-            if (addN >= addMax) {
-                result -= nex;
+
+
+        for (size_t i = 1; i < num; ++i) {
+			if (addN >= addMax) {
+				ret = op(ret, visit(ctx->term(i)), 1);
                 ++minusN;
             } else if (minusN >= minusMax) {
-                result += nex;
+				ret = op(ret, visit(ctx->term(i)), 0);
                 ++addN;
             } else if (getNodeIndex(ctx->ADD(addN)) > getNodeIndex(ctx->MINUS(minusN))) {
-                result -= nex;
+				ret = op(ret, visit(ctx->term(i)), 1);
                 ++minusN;
             } else {
-                result += nex;
+				ret = op(ret, visit(ctx->term(i)), 0);
                 ++addN;
             }
         }
-        return result;
+//        if (ret.is<std::string>()) {
+//            if (minusMax) {
+//                //err
+//            }
+//            std::string result = ret.as<std::string>();
+//            Any tmp;
+//            for (size_t i = 1;i < num;++i) {
+//                tmp = visit(ctx->term(i));
+//                if (!tmp.is<std::string>()) {
+//                    //err
+//                }
+//                result = result + tmp.as<std::string>();
+//            }
+//            return result;
+//        }
+//
+//        antlrcpp::Any result = toInt(ret);
+//        int nex;
+//        for (size_t i = 1;i < num;++i) {
+//            nex = toInt(visit(ctx->term(i)));
+//            if (addN >= addMax) {
+//                result -= nex;
+//                ++minusN;
+//            } else if (minusN >= minusMax) {
+//                result += nex;
+//                ++addN;
+//            } else if (getNodeIndex(ctx->ADD(addN)) > getNodeIndex(ctx->MINUS(minusN))) {
+//                result -= nex;
+//                ++minusN;
+//            } else {
+//                result += nex;
+//                ++addN;
+//            }
+//        }
+        return ret;
     }
 
     antlrcpp::Any visitTerm(Python3Parser::TermContext *ctx) override 
@@ -576,31 +801,55 @@ public:
         auto ret = visit(ctx->factor(0));
         size_t num = ctx->factor().size();
         size_t starN = 0, divN = 0, starMax = ctx->STAR().size(), divMax = ctx->DIV().size();
-        
-        if (num == 1) return ret;
-        
-        if (program.checkIsName) {
-            //err
-        }
-        int result = toInt(ret);
-        int nex;
-        for (size_t i = 1;i < num;++i) {
-            nex = toInt(visit(ctx->factor(i)));
-            if (starN >= starMax) {
-                result /= nex;
-                ++divN;
-            } else if (divN >= divMax) {
-                result *= nex;
-                ++starN;
-            } else if (getNodeIndex(ctx->STAR(starN)) > getNodeIndex(ctx->DIV(divN))) {
-                result /= nex;
-                ++divN;
-            } else {
-                result *= nex;
-                ++starN;
-            }
-        }
-        return result;
+
+		if (num == 1) {
+			return ret;
+		}
+
+		if (program.checkIsName || ret.is<sjtu::none_t>()) {
+			//err
+		}
+		if (isList(ret)) {
+			//err
+		}
+
+
+		for (size_t i = 1; i < num; ++i) {
+			if (divN >= divMax) {
+				ret = op(ret, visit(ctx->factor(i)), 2);
+				++starN;
+			} else if (starN >= starMax) {
+				ret = op(ret, visit(ctx->factor(i)), 3);
+				++divN;
+			} else if (getNodeIndex(ctx->DIV(divN)) > getNodeIndex(ctx->STAR(starN))) {
+				ret = op(ret, visit(ctx->factor(i)), 2);
+				++starN;
+			} else {
+				ret = op(ret, visit(ctx->factor(i)), 3);
+				++divN;
+			}
+		}
+
+
+//        int result = toInt(ret);
+//        int nex;
+//        for (size_t i = 1;i < num;++i) {
+//            nex = toInt(visit(ctx->factor(i)));
+//            if (starN >= starMax) {
+//                result /= nex;
+//                ++divN;
+//            } else if (divN >= divMax) {
+//                result *= nex;
+//                ++starN;
+//            } else if (getNodeIndex(ctx->STAR(starN)) > getNodeIndex(ctx->DIV(divN))) {
+//                result /= nex;
+//                ++divN;
+//            } else {
+//                result *= nex;
+//                ++starN;
+//            }
+//        }
+        return ret;
     }
 
     antlrcpp::Any visitFactor(Python3Parser::FactorContext *ctx) override 
@@ -613,24 +862,20 @@ public:
                 //err
             }
             Any ret = visit(ctx->factor());
-            if (isList(ret)) {
-                //err
+
+            int flag = ctx->ADD() != nullptr ? 1 : -1;
+            if (ret.is<bool>()) {
+            	return BigInt(int(ret.as<bool>())) * BigInt(flag);
             }
-            if (ret.is<std::string>() || (ret.is<sjtu::none_t>())) {
-                //err
+            else if (ret.is<double>()) {
+				return ret.as<double>() * flag;
             }
-            if (ctx->ADD() != nullptr) {
-                if (ret.is<bool>()) {
-                    return (int)ret.as<bool>();
-                }
-                else return ret;
+            else if (ret.is<BigInt>()) {
+				return ret.as<BigInt>() * BigInt(flag);
             }
             else {
-                if (ret.is<bool>()) {
-                    return -1 * (int)ret.as<bool>();
-                }
-                else return -1 * ret.as<int>();
-            }
+				//err
+			}
         }
     }
 
@@ -739,7 +984,10 @@ public:
         }
         if (ctx->NUMBER() != nullptr){
             //this version do not support superlong caculation and double
-            return std::atoi(ctx->NUMBER()->toString().c_str());
+            if (ctx->NUMBER()->toString().find('.') != std::string::npos)
+            	return std::stod(ctx->NUMBER()->toString().c_str());
+            else
+            	return BigInt(ctx->NUMBER()->toString());
         } else if (ctx->NAME() != nullptr) {
             std::string name = ctx->NAME()->toString();
             return *program.getValue(name);
