@@ -79,8 +79,6 @@ public:
 
     virtual antlrcpp::Any visitAtom(Python3Parser::AtomContext *context) = 0;
 
-    virtual antlrcpp::Any visitNamelist(Python3Parser::NamelistContext *context) = 0;
-
     virtual antlrcpp::Any visitTestlist(Python3Parser::TestlistContext *context) = 0;
 
     virtual antlrcpp::Any visitArglist(Python3Parser::ArglistContext *context) = 0;

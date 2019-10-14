@@ -134,7 +134,7 @@ not_test: 'not' not_test | comparison;
 comparison: arith_expr (comp_op arith_expr)*;
 comp_op: '<'|'>'|'=='|'>='|'<=';
 arith_expr: term (('+'|'-') term)*;
-term: factor (('*'|'/') factor)*;
+term: factor (('*'|'/'|'//'|'%') factor)*;
 factor: ('+'|'-') factor | atom_expr;
 atom_expr: atom trailer?;
 trailer: '(' (arglist)? ')' ;

@@ -135,10 +135,6 @@ public:
     return visitChildren(ctx);
   }
 
-  virtual antlrcpp::Any visitNamelist(Python3Parser::NamelistContext *ctx) override {
-    return visitChildren(ctx);
-  }
-
   virtual antlrcpp::Any visitTestlist(Python3Parser::TestlistContext *ctx) override {
     return visitChildren(ctx);
   }

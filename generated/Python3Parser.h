@@ -38,8 +38,8 @@ public:
     RuleIf_stmt = 15, RuleWhile_stmt = 16, RuleSuite = 17, RuleTest = 18, 
     RuleOr_test = 19, RuleAnd_test = 20, RuleNot_test = 21, RuleComparison = 22, 
     RuleComp_op = 23, RuleArith_expr = 24, RuleTerm = 25, RuleFactor = 26, 
-    RuleAtom_expr = 27, RuleTrailer = 28, RuleAtom = 29, RuleNamelist = 30, 
-    RuleTestlist = 31, RuleArglist = 32, RuleArgument = 33
+    RuleAtom_expr = 27, RuleTrailer = 28, RuleAtom = 29, RuleTestlist = 30, 
+    RuleArglist = 31, RuleArgument = 32
   };
 
   Python3Parser(antlr4::TokenStream *input);
@@ -82,7 +82,6 @@ public:
   class Atom_exprContext;
   class TrailerContext;
   class AtomContext;
-  class NamelistContext;
   class TestlistContext;
   class ArglistContext;
   class ArgumentContext; 
@@ -541,6 +540,10 @@ public:
     antlr4::tree::TerminalNode* STAR(size_t i);
     std::vector<antlr4::tree::TerminalNode *> DIV();
     antlr4::tree::TerminalNode* DIV(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> IDIV();
+    antlr4::tree::TerminalNode* IDIV(size_t i);
+    std::vector<antlr4::tree::TerminalNode *> MOD();
+    antlr4::tree::TerminalNode* MOD(size_t i);
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
@@ -611,6 +614,9 @@ public:
     antlr4::tree::TerminalNode *NONE();
     antlr4::tree::TerminalNode *TRUE();
     antlr4::tree::TerminalNode *FALSE();
+    antlr4::tree::TerminalNode *OPEN_PAREN();
+    TestContext *test();
+    antlr4::tree::TerminalNode *CLOSE_PAREN();
     std::vector<antlr4::tree::TerminalNode *> STRING();
     antlr4::tree::TerminalNode* STRING(size_t i);
 
@@ -622,24 +628,6 @@ public:
   };
 
   AtomContext* atom();
-
-  class  NamelistContext : public antlr4::ParserRuleContext {
-  public:
-    NamelistContext(antlr4::ParserRuleContext *parent, size_t invokingState);
-    virtual size_t getRuleIndex() const override;
-    std::vector<antlr4::tree::TerminalNode *> NAME();
-    antlr4::tree::TerminalNode* NAME(size_t i);
-    std::vector<antlr4::tree::TerminalNode *> COMMA();
-    antlr4::tree::TerminalNode* COMMA(size_t i);
-
-    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
-    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
-
-    virtual antlrcpp::Any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
-   
-  };
-
-  NamelistContext* namelist();
 
   class  TestlistContext : public antlr4::ParserRuleContext {
   public:

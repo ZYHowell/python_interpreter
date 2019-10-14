@@ -106,9 +106,6 @@ public:
   virtual void enterAtom(Python3Parser::AtomContext * /*ctx*/) override { }
   virtual void exitAtom(Python3Parser::AtomContext * /*ctx*/) override { }
 
-  virtual void enterNamelist(Python3Parser::NamelistContext * /*ctx*/) override { }
-  virtual void exitNamelist(Python3Parser::NamelistContext * /*ctx*/) override { }
-
   virtual void enterTestlist(Python3Parser::TestlistContext * /*ctx*/) override { }
   virtual void exitTestlist(Python3Parser::TestlistContext * /*ctx*/) override { }
 

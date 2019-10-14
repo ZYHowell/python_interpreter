@@ -104,9 +104,6 @@ public:
   virtual void enterAtom(Python3Parser::AtomContext *ctx) = 0;
   virtual void exitAtom(Python3Parser::AtomContext *ctx) = 0;
 
-  virtual void enterNamelist(Python3Parser::NamelistContext *ctx) = 0;
-  virtual void exitNamelist(Python3Parser::NamelistContext *ctx) = 0;
-
   virtual void enterTestlist(Python3Parser::TestlistContext *ctx) = 0;
   virtual void exitTestlist(Python3Parser::TestlistContext *ctx) = 0;
 
