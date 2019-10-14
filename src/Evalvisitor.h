@@ -98,7 +98,7 @@ public:
 	}
 
     /*
-     * Tramsformations which need to be overrided when super-long int is introduced in.
+     * A tramsformation.
     */
     inline bool toBool(const Any &it)
     {
@@ -766,40 +766,6 @@ public:
                 ++addN;
             }
         }
-//        if (ret.is<std::string>()) {
-//            if (minusMax) {
-//                //err
-//            }
-//            std::string result = ret.as<std::string>();
-//            Any tmp;
-//            for (size_t i = 1;i < num;++i) {
-//                tmp = visit(ctx->term(i));
-//                if (!tmp.is<std::string>()) {
-//                    //err
-//                }
-//                result = result + tmp.as<std::string>();
-//            }
-//            return result;
-//        }
-//
-//        antlrcpp::Any result = toInt(ret);
-//        int nex;
-//        for (size_t i = 1;i < num;++i) {
-//            nex = toInt(visit(ctx->term(i)));
-//            if (addN >= addMax) {
-//                result -= nex;
-//                ++minusN;
-//            } else if (minusN >= minusMax) {
-//                result += nex;
-//                ++addN;
-//            } else if (getNodeIndex(ctx->ADD(addN)) > getNodeIndex(ctx->MINUS(minusN))) {
-//                result -= nex;
-//                ++minusN;
-//            } else {
-//                result += nex;
-//                ++addN;
-//            }
-//        }
         return ret;
     }
 
@@ -836,26 +802,6 @@ public:
 				++divN;
 			}
 		}
-
-
-//        int result = toInt(ret);
-//        int nex;
-//        for (size_t i = 1;i < num;++i) {
-//            nex = toInt(visit(ctx->factor(i)));
-//            if (starN >= starMax) {
-//                result /= nex;
-//                ++divN;
-//            } else if (divN >= divMax) {
-//                result *= nex;
-//                ++starN;
-//            } else if (getNodeIndex(ctx->STAR(starN)) > getNodeIndex(ctx->DIV(divN))) {
-//                result /= nex;
-//                ++divN;
-//            } else {
-//                result *= nex;
-//                ++starN;
-//            }
-//        }
         return ret;
     }
 
