@@ -419,10 +419,17 @@ public:
     {
         auto tfps = ctx->tfpdef();
         auto tests = ctx->test();
-        size_t i = 0;
-        auto ret = std::make_shared<std::vector<sjtu::funcArg>>(std::vector<sjtu::funcArg>(tfps.size()));
-        for (auto tfp : tfps) {
-            ret->operator[](i) = sjtu::funcArg(visit(tests[i]), 1, visit(tfp));
+        auto ret = std::make_shared<std::vector<sjtu::funcArg>>
+                        (std::vector<sjtu::funcArg>(tfps.size()));
+        size_t testSize = tests.size();
+        size_t noTstSize = tfps.size() - testSize;
+        for (size_t i = 0;i < noTstSize;++i) {
+            ret->operator[](i) = sjtu::funcArg(Any(), 0, visit(tfps[i]).as<std::string>());
+        }
+
+        for (size_t i = noTstSize;i < tfps.size();++i) {
+            ret->operator[](i) = sjtu::funcArg(visit(tests[i - noTstSize]), 
+                                               1, visit(tfps[i]).as<std::string>());
         }
         return ret;
     }
