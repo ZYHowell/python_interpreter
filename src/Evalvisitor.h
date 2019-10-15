@@ -962,6 +962,8 @@ public:
             return true;
         } else if (ctx->FALSE() != nullptr) {
             return false;
+        } else if (ctx->test() != nullptr) {
+            return visit(ctx->test());
         }
     }
 
