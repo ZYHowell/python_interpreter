@@ -1,9 +1,9 @@
 
-// Generated from .\Python3.g4 by ANTLR 4.7.2
+// Generated from Python3.g4 by ANTLR 4.7.2
 
 
 #include "Python3Lexer.h"
-#include <regex>
+
 
 using namespace antlr4;
 
@@ -14,8 +14,8 @@ Python3Lexer::Python3Lexer(CharStream *input) : Lexer(input) {
 
 Python3Lexer::~Python3Lexer() {
   delete _interpreter;
-  for (auto i : tokens) {
-    delete i;
+  for (auto token : tokens) {
+    delete token;
   }
 }
 
@@ -92,17 +92,20 @@ void Python3Lexer::NEWLINEAction(antlr4::RuleContext *context, size_t actionInde
             // If we're inside a list or on a blank line, ignore all indents,
             // dedents and line breaks.
             skip();
-          } else {
+          }
+          else {
             emit(commonToken(NEWLINE, newLine));
             int indent = getIndentationCount(spaces);
             int previous = indents.empty() ? 0 : indents.top();
             if (indent == previous) {
               // skip indents of the same size as the present indent-size
               skip();
-              } else if (indent > previous) {
+            }
+            else if (indent > previous) {
               indents.push(indent);
               emit(commonToken(Python3Parser::INDENT, spaces));
-              } else {
+            }
+            else {
               // Possibly emit more than 1 DEDENT token.
               while(!indents.empty() && indents.top() > indent) {
                 this->emit(createDedent());
@@ -111,6 +114,7 @@ void Python3Lexer::NEWLINEAction(antlr4::RuleContext *context, size_t actionInde
             }
           }
         break;
+
 
   }
 }
