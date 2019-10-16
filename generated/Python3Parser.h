@@ -253,6 +253,8 @@ public:
     antlr4::tree::TerminalNode *SUB_ASSIGN();
     antlr4::tree::TerminalNode *MULT_ASSIGN();
     antlr4::tree::TerminalNode *DIV_ASSIGN();
+    antlr4::tree::TerminalNode *IDIV_ASSIGN();
+    antlr4::tree::TerminalNode *MOD_ASSIGN();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;

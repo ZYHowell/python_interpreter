@@ -137,10 +137,12 @@ public:
 					myInt = bInt;
 					bInt = tmp; //交换
 					rslt.symbol = false;
+				} else{
+                    rslt.symbol = true;
 				}
 				myInt = -myInt;
 				bInt = -bInt; //变正
-				rslt.symbol = true;
+				
 			}
 		} else if (myInt.symbol) return -(-myInt + bInt); //左负 右正
 		else if (bInt.symbol) return myInt + (-bInt); //左正 右负
@@ -169,7 +171,7 @@ public:
 //重载 - 运算符 使之支持用 - 进行高精度整数的加法运算 单目运算
 	BigInt operator-() const {
 		BigInt rslt(*this);
-		if (rslt != 0) rslt.symbol = !rslt.symbol;
+		rslt.symbol = !rslt.symbol;
 		return rslt;
 	}
 
@@ -199,7 +201,45 @@ public:
 		rslt.symbol = symbol ^ bInt.symbol;
 		return rslt;
 	}
-
+    BigInt operator / (const BigInt bInt) const
+    {
+        BigInt tmp;
+        string rsltS;
+        if(bInt == 0) return BigInt(0); //除数为0 返回0
+//获取相除的两个数字的长度
+        vector<int>::size_type lenA(num.size()), lenB(bInt.num.size()), len(0);
+//按倒序位读取被除数
+        vector<int>::size_type i(lenA);
+        while(i--)
+        {
+            if(tmp == 0) tmp.num.pop_back();
+            tmp.num.insert(tmp.num.begin(), num[i]); //插入一个数
+//开始试除
+            BigInt tmp2; //存储试除
+            int i(10);
+            while(i--) //由大到小进行试除运算
+            {
+                tmp2 = (bInt < 0 ? -bInt : bInt) * i; //这里对除数为负数的情况作了一些判断，我们在运算过程中要确保符号均为正
+                tmp2 = tmp - tmp2; //减去试除结果
+                if(tmp2 >= 0) //首个非负的试除结果
+                {
+                    rsltS += i + '0'; //商
+                    tmp = tmp2;
+                    break;
+                }
+            }
+        }
+        BigInt rslt(rsltS); //结果 该构造函数自动去除前导零
+//同号为正 异号为负
+        rslt.symbol = symbol ^ bInt.symbol;
+        if(rslt.symbol && rslt*bInt != (*this)) {
+            rslt-=1;
+        }
+        return rslt;
+    }
+    BigInt operator%(const BigInt bInt){
+        return *this-((*this/bInt)*bInt);
+	}
 //重载 += 运算符 使之支持用 += 进行高精度整数的加法运算
 	BigInt operator+=(const BigInt bInt) {
 		*this = *this + bInt;
@@ -221,7 +261,9 @@ public:
 //重载 < 运算符 使之支持使用 < 直接进行高精度整数的比较
 	bool operator<(const BigInt bInt) const {
 		vector<int>::size_type bLen(bInt.num.size());
-
+        if ((*this) == 0 && bInt == 0) {
+            return false;
+        }
 		if (!bInt.symbol && symbol) return true; //左正 右负
 		else if (bInt.symbol && !symbol) return false; //左负 右正
 		else if (num.size() != bLen) //长度不一样，直接返回大小结果
@@ -254,11 +296,22 @@ public:
 	}
 
 	bool operator!=(const BigInt bInt) const {
-		return (*this < bInt) || (*this > bInt);
+		return !(*this==bInt);
 	}
 
 	bool operator==(const BigInt bInt) const {
-		return !(*this != bInt);
+        if (this->num.size() == 1 && this->num[0] == 0 && bInt.num.size() == 1 && bInt.num[0] == 0) {
+            return true;
+        }
+	    if(bInt.symbol!=this->symbol || this->num.size()!=bInt.num.size()) {
+            return false;
+	    }
+        for (int i = 0; i < bInt.num.size(); i++) {
+            if (bInt.num[i] != this->num[i]) {
+                return false;
+            }
+        }
+        return true;
 	}
 
 	explicit operator double() {
@@ -284,7 +337,7 @@ std::istream &operator>>(std::istream &in, BigInt &x) {
 
 //重载C++输出流运算符 使之支持C++IO流直接输出高精度整数
 std::ostream &operator<<(std::ostream &out, const BigInt &x) {
-	if (x.symbol) out << '-';
+	if (x.symbol && x!=0) out << '-';
 //以数字的正确顺序输出
 	for (vector<int>::size_type i(x.num.size() - 1); i > 0; --i) {
 		out << x.num[i];

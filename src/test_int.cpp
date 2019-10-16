@@ -6,5 +6,5 @@
 int main(){
     BigInt a,b;
     std::cin>>a>>b;
-    std::cout<<double(a*b);
+    std::cout<<a%b;
 }

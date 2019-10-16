@@ -118,7 +118,7 @@ simple_stmt: small_stmt  NEWLINE;
 small_stmt: expr_stmt | flow_stmt;
 expr_stmt: testlist ( (augassign testlist) |
                      ('=' testlist)*);//连等 加等/减等/...
-augassign: ('+=' | '-=' | '*=' | '/=' );
+augassign: ('+=' | '-=' | '*=' | '/=' | '//=' | '%=' );
 flow_stmt: break_stmt | continue_stmt | return_stmt;
 break_stmt: 'break';
 continue_stmt: 'continue';
