@@ -495,27 +495,17 @@ public:
 
             //bool, double, BigInt, std:string
             if (ctx->augassign()->ADD_ASSIGN() != nullptr) {
-            	*content = op(*content, result, 0);
-                puts("hahaha0");
-                //*content += result;
+            	*content = op(*content, result[0], 0);
             } else if (ctx->augassign()->SUB_ASSIGN() != nullptr) {
-				*content = op(*content, result, 1);
-                puts("hahaha1");
-                //*content -= result;
+				*content = op(*content, result[0], 1);
             } else if (ctx->augassign()->MULT_ASSIGN() != nullptr) {
-				*content = op(*content, result, 2);
-                puts("hahah2");
-                //*content *= result;
+				*content = op(*content, result[0], 2);
             } else if (ctx->augassign()->DIV_ASSIGN() != nullptr) {
-				*content = op(*content, result, 3);
-                puts("hahaha3");
-                //*content /= result;
+				*content = op(*content, result[0], 3);
             } else if (ctx->augassign()->IDIV_ASSIGN() != nullptr) {
-                *content = op(*content, result, 4);
-                puts("hahaha4");
+                *content = op(*content, result[0], 4);
             } else if (ctx->augassign()->MOD_ASSIGN() != nullptr) {
-                *content = op(*content, result, 5);
-                puts("hahaha5");
+                *content = op(*content, result[0], 5);
             } else {
                 // err
             }
@@ -822,10 +812,10 @@ public:
         sort(opcodeList.begin(), opcodeList.end());
         
         // for (auto i : opcodeList)
-        //     std::cout << i << std::endl;
+        // std::cout << i << std::endl;
 
-        for (int i = 0; i < opcodeList.size(); ++i)
-            ret = op(ret, visit(ctx->factor(i)), opcodeList[i].second);
+        for (size_t i = 0; i < opcodeList.size(); ++i)
+            ret = op(ret, visit(ctx->factor(i + 1)), opcodeList[i].second);
 
         return ret;
     }

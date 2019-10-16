@@ -19,8 +19,8 @@ public:
 
 	double to_double() const {
 		double ret = 0;
-		for (auto i : num) {
-			ret = ret * 10 + i;
+		for (int i = num.size() - 1; i >= 0; --i){
+			ret = ret * 10 + num[i];
 		}
 		return ret;
 	}
