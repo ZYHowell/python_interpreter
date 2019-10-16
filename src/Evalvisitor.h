@@ -37,6 +37,8 @@ public:
 	 * 1 -
 	 * 2 *
 	 * 3 /
+     * 4 //
+     * 5 %
 	 */
 	antlrcpp::Any op(antlrcpp::Any a, antlrcpp::Any b, int opcode) {
 		if (a.is<std::string>() && b.is<std::string>()) {
@@ -71,6 +73,8 @@ public:
 					return da * db;
 				else if (opcode == 3)
 					return da / db;
+                puts("!!!");
+                assert(opcode != 4 && opcode != 5);
 			}
 			else {
 				BigInt da, db;
@@ -90,6 +94,10 @@ public:
 					return da * db;
 				else if (opcode == 3)
 					return da.to_double() / db.to_double();
+                else if (opcode == 4)
+                    return da / db;
+                else if (opcode == 5)
+                    return da % db;
 			}
 		}
 		else {
@@ -488,16 +496,28 @@ public:
             //bool, double, BigInt, std:string
             if (ctx->augassign()->ADD_ASSIGN() != nullptr) {
             	*content = op(*content, result, 0);
+                puts("hahaha0");
                 //*content += result;
             } else if (ctx->augassign()->SUB_ASSIGN() != nullptr) {
 				*content = op(*content, result, 1);
+                puts("hahaha1");
                 //*content -= result;
             } else if (ctx->augassign()->MULT_ASSIGN() != nullptr) {
 				*content = op(*content, result, 2);
+                puts("hahah2");
                 //*content *= result;
-            } else {
+            } else if (ctx->augassign()->DIV_ASSIGN() != nullptr) {
 				*content = op(*content, result, 3);
+                puts("hahaha3");
                 //*content /= result;
+            } else if (ctx->augassign()->IDIV_ASSIGN() != nullptr) {
+                *content = op(*content, result, 4);
+                puts("hahaha4");
+            } else if (ctx->augassign()->MOD_ASSIGN() != nullptr) {
+                *content = op(*content, result, 5);
+                puts("hahaha5");
+            } else {
+                // err
             }
 
         } else if (ctx->ASSIGN().size()){
@@ -773,7 +793,6 @@ public:
     {
         auto ret = visit(ctx->factor(0));
         size_t num = ctx->factor().size();
-        size_t starN = 0, divN = 0, starMax = ctx->STAR().size(), divMax = ctx->DIV().size();
 
 		if (num == 1) {
 			return ret;
@@ -786,22 +805,28 @@ public:
 			//err
 		}
 
+        vector<std::pair<int, int> > opcodeList;
+        // opcodeList.resize(ctx->factor().size());
 
-		for (size_t i = 1; i < num; ++i) {
-			if (divN >= divMax) {
-				ret = op(ret, visit(ctx->factor(i)), 2);
-				++starN;
-			} else if (starN >= starMax) {
-				ret = op(ret, visit(ctx->factor(i)), 3);
-				++divN;
-			} else if (getNodeIndex(ctx->DIV(divN)) > getNodeIndex(ctx->STAR(starN))) {
-				ret = op(ret, visit(ctx->factor(i)), 2);
-				++starN;
-			} else {
-				ret = op(ret, visit(ctx->factor(i)), 3);
-				++divN;
-			}
-		}
+        // std::cout << ctx->STAR().size() << " " << ctx->DIV().size() << " " << ctx->IDIV().size() << " " << ctx->MOD().size() << std::endl;
+
+        for (auto i : ctx->STAR())
+            opcodeList.push_back(std::make_pair(getNodeIndex(i), 2));
+        for (auto i : ctx->DIV())
+            opcodeList.push_back(std::make_pair(getNodeIndex(i), 3));
+        for (auto i : ctx->IDIV())
+            opcodeList.push_back(std::make_pair(getNodeIndex(i), 4));
+        for (auto i : ctx->MOD())
+            opcodeList.push_back(std::make_pair(getNodeIndex(i), 5));
+        
+        sort(opcodeList.begin(), opcodeList.end());
+        
+        // for (auto i : opcodeList)
+        //     std::cout << i << std::endl;
+
+        for (int i = 0; i < opcodeList.size(); ++i)
+            ret = op(ret, visit(ctx->factor(i)), opcodeList[i].second);
+
         return ret;
     }
 
