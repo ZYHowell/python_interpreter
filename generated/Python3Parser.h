@@ -1,5 +1,5 @@
 
-// Generated from Python3.g4 by ANTLR 4.7.2
+// Generated from .\Python3.g4 by ANTLR 4.7.2
 
 #pragma once
 
@@ -502,6 +502,7 @@ public:
     antlr4::tree::TerminalNode *EQUALS();
     antlr4::tree::TerminalNode *GT_EQ();
     antlr4::tree::TerminalNode *LT_EQ();
+    antlr4::tree::TerminalNode *NOT_EQ_2();
 
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;

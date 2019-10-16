@@ -3,7 +3,7 @@ def calc(a, b, c, d): # a / b + c / d
     y = b * d
     p = x
     q = y
-    while p != 0:
+    while p == 0:
         p, q = q - q // p * p, p
     x = x // q
     y = y // q
