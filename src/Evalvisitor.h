@@ -120,9 +120,9 @@ public:
         } else if (it.is<bool>()) {
             return it.as<bool>();
         } else if (it.is<BigInt>()) {
-			return it.as<BigInt>() == BigInt();
+			return it.as<BigInt>() != BigInt();
 		} else if (it.is<double>())
-			return it.as<double>() == 0.0;
+			return it.as<double>() != 0.0;
     }
 
     /*
@@ -863,6 +863,12 @@ public:
                     printVector(paras);
                     std::cout << std::endl;
                     return sjtu::none_t();
+                } else if (funcName == "int") {
+
+                } else if (funcName == "float") {
+
+                } else if (funcName == "str") {
+
                 }
                 
                 if (!program.funcs.count(funcName)) {
