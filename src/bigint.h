@@ -25,6 +25,14 @@ public:
 		return ret;
 	}
 
+	std::string to_string() const {
+		std::string ret;
+		for (int i = num.size() - 1; i >= 0; --i){
+			ret += num[i] + '0';
+		}
+		return ret;
+	}
+
 	BigInt operator=(const int iNum) {
 		num.erase(num.begin(), num.end());
 		int tmp;
