@@ -5,6 +5,8 @@
 #include <cstring>
 #include <vector>
 #include <algorithm>
+#include <sstream>
+
 using namespace std;
 const double PI = acos(-1.0);
 struct Complex{
@@ -211,30 +213,19 @@ public:
     }
     friend BigInt operator*(const BigInt &lhs, const BigInt &rhs)
     {
-        int len=1;
-        BigInt ll=lhs,rr=rhs;
-        ll.nega = lhs.nega ^ rhs.nega;
-        while(len<2*lhs.size()||len<2*rhs.size())len<<=1;
-        ll.val.resize(len),rr.val.resize(len);
-        Complex x1[len],x2[len];
-        for(int i=0;i<len;i++){
-            Complex nx(ll[i],0.0),ny(rr[i],0.0);
-            x1[i]=nx;
-            x2[i]=ny;
+        BigInt res;
+        res.val.resize(lhs.size()+rhs.size());
+        for (int i = 0; i < lhs.size(); i++) {
+            for (int j = 0; j < rhs.size(); j++) {
+                res.val[i+j]+=lhs.val[i]*rhs.val[j];
+                res.val[i+j+1]+=res.val[i+j]/Mod;
+                res.val[i+j]%=Mod;
+            }
         }
-        fft(x1,len,1);
-        fft(x2,len,1);
-        for(int i = 0 ; i < len; i++)
-            x1[i] = x1[i] * x2[i];
-        fft( x1 , len , -1 );
-        for(int i = 0 ; i < len; i++)
-            ll[i] = int( x1[i].x + 0.5 );
-        for(int i = 0 ; i < len; i++){
-            ll[i+1]+=ll[i]/Mod;
-            ll[i]%=Mod;
+        if (res.val[res.size() - 1] == 0) {
+            res.val.pop_back();
         }
-        ll.trim();
-        return ll;
+        return res;
     }
     friend BigInt operator*(const BigInt &lhs, const Long &x){
         BigInt ret=lhs;

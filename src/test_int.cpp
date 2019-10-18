@@ -4,7 +4,10 @@
 #include "bigint.h"
 #include <iostream>
 int main(){
-    BigInt a,b;
-    a=-9231492157329;
-    std::cout<<double(a);
+    BigInt a("123456789098765432112345678909876543211234567890987654321");
+    for (int i = 0; i <= 10; i++) {
+        a=a*a;
+    }
+//    a=a*a;
+    std::cout<<a;
 }
