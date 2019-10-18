@@ -88,24 +88,27 @@ class BigInt
     Long &back() const { return val.back(); }
     BigInt(int size, bool nega) : val(size), nega(nega) {}
     BigInt(const std::vector<Long> &val, bool nega) : val(val), nega(nega) {}
-
+    
+   
 public:
+    BigInt (const BigInt &bigInt)= default;
     friend std::ostream &operator<<(std::ostream &os, const BigInt &n)
     {
         if (n.size())
         {
             if (n.nega)
-                putchar('-');
+                os<<'-';
             for (int i = n.size() - 1; i >= 0; --i)
             {
                 if (i == n.size() - 1)
-                    printf("%lld", n[i]);
-                else
-                    printf("%0*lld", n.Exp, n[i]);
+                   os<<n[i];
+                else {
+                    os<<setfill('0')<<setw(n.Exp)<<n[i];
+                }
             }
         }
         else
-            putchar('0');
+            os<<'0';
         return os;
     }
     friend BigInt operator+(const BigInt &lhs, const BigInt &rhs)

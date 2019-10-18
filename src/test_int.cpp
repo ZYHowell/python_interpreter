@@ -9,5 +9,5 @@ int main(){
         a=a*a;
     }
 //    a=a*a;
-    std::cout<<a;
+    std::cout<<a.to_string();
 }

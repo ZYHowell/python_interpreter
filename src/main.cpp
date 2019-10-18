@@ -5,8 +5,8 @@
 #include "Evalvisitor.h"
 using namespace antlr4;
 int main(int argc, const char* argv[]){
-    const std::string filepath="testData/test"+std::string(argv[1])+".in";
-    //const std::string filepath = "../test.py";
+//    const std::string filepath="testData/test"+std::string(argv[1])+".in";
+    const std::string filepath = "../testData/test47.in";
     std::ifstream ifs;
     ifs.open(filepath);
     if (!ifs.good()) {

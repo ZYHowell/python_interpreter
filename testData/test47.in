@@ -4,7 +4,7 @@ def pow(m, n, mod):
         if n % 2:
             ans = ans * m % mod
         m = m * m % mod
-        n /= 2
+        n //= 2
     return ans
 
 def inv(n, p): #the inverse element of n modulo p when p is prime
