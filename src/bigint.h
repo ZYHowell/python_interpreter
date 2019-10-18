@@ -125,13 +125,26 @@ public:
         if (x)
             val.push_back(x);
     }
-    BigInt(const char *s)
-    {
+//    BigInt(const char *s)
+//    {
+//        int bound = 0, pos;
+//        if (s[0] == '-')
+//            nega = true, bound = 1;
+//        Long cur = 0, pow = 1;
+//        for (pos = strlen(s) - 1; pos >= Exp + bound - 1; pos -= Exp, val.push_back(cur), cur = 0, pow = 1)
+//            for (int i = pos; i > pos - Exp; --i)
+//                cur += (s[i] - '0') * pow, pow *= 10;
+//        for (cur = 0, pow = 1; pos >= bound; --pos)
+//            cur += (s[pos] - '0') * pow, pow *= 10;
+//        if (cur)
+//            val.push_back(cur);
+//    }
+    BigInt(const std::string &s){
         int bound = 0, pos;
         if (s[0] == '-')
             nega = true, bound = 1;
         Long cur = 0, pow = 1;
-        for (pos = strlen(s) - 1; pos >= Exp + bound - 1; pos -= Exp, val.push_back(cur), cur = 0, pow = 1)
+        for (pos = s.size() - 1; pos >= Exp + bound - 1; pos -= Exp, val.push_back(cur), cur = 0, pow = 1)
             for (int i = pos; i > pos - Exp; --i)
                 cur += (s[i] - '0') * pow, pow *= 10;
         for (cur = 0, pow = 1; pos >= bound; --pos)
@@ -142,12 +155,12 @@ public:
     BigInt &operator=(const char *s){
         BigInt n(s);
         *this = n;
-        return n;
+        return *this;
     }
     BigInt &operator=(const Long x){
         BigInt n(x);
         *this = n;
-        return n;
+        return *this;
     }
     friend std::istream &operator>>(std::istream &is, BigInt &n){
         string s;
@@ -312,7 +325,7 @@ public:
         std::swap(val, rhs.val);
         std::swap(nega, rhs.nega);
     }
-    operator double(){
+    operator double()const {
         double res=0;
         for (int i = size()-1; i >=0; i--) {
             res*=Mod;
@@ -322,5 +335,15 @@ public:
             res*=-1;
         }
         return res;
+    }
+    std::string to_string() const {
+        stringstream ss;
+        ss<<(*this);
+        std::string str;
+        ss>>str;
+        return str;
+    }
+    double to_double() const {
+        return double(*this);
     }
 };
