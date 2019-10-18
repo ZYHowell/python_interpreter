@@ -2,6 +2,7 @@
 #define PYTHON_INTERPRETER_EVALVISITOR_H
 
 #include <cmath>
+#include <regex>
 #include "Python3BaseVisitor.h"
 #include "Program.h"
 #include "exceptions.h"
@@ -120,9 +121,9 @@ public:
         } else if (it.is<bool>()) {
             return it.as<bool>();
         } else if (it.is<BigInt>()) {
-			return it.as<BigInt>() == BigInt();
+			return it.as<BigInt>() != BigInt();
 		} else if (it.is<double>())
-			return it.as<double>() == 0.0;
+			return it.as<double>() != 0.0;
     }
 
     /*
@@ -863,6 +864,95 @@ public:
                     printVector(paras);
                     std::cout << std::endl;
                     return sjtu::none_t();
+                } else if (funcName == "int") {
+                    assert(paras.size() == 1);
+                    Any jhytql = paras[0].as<sjtu::funcArg>().value;
+                    if (jhytql.is<BigInt>()) {
+                        return jhytql.as<BigInt>();
+                    }
+                    else if (jhytql.is<double>()) {
+                        return BigInt(int(jhytql.as<double>()));
+                    }
+                    else if (jhytql.is<bool>()) {
+                        return BigInt(int(jhytql.as<bool>()));
+                    }
+                    else if (jhytql.is<std::string>()) {
+                        std::string jhy = jhytql.as<std::string>();
+                        std::regex r_int("([1-9][0-9]*|0+)");
+                        std::regex r_double("([0-9]+.|.[0-9]+|[0-9]+.[0-9]+)");
+                        // std::regex r_double("[0-9]+");
+                        // std::cout << jhytql.as<std::string>() << std::endl;
+                        if (std::regex_match(jhy, r_int))
+                            return BigInt(jhy);
+                        else if (std::regex_match(jhy, r_double)) {
+                            std::string ret = "0";
+                            for (int i = 0; i < jhy.size() && jhy[i] != '.'; ++i)
+                                ret += jhy[i];
+                            return BigInt(ret);
+                        }
+                        else if (jhy == "True")
+                            return BigInt(1);
+                        else if (jhy == "False")
+                            return BigInt(0);   
+                        else
+                            assert(false);
+                    }
+                    else {
+                        // err
+                        assert(false);
+                    }
+                } else if (funcName == "float") {
+                    assert(paras.size() == 1);
+                    Any jhytql = paras[0].as<sjtu::funcArg>().value;
+                    if (jhytql.is<BigInt>()) {
+                        return jhytql.as<BigInt>().to_double();
+                    }
+                    else if (jhytql.is<double>()) {
+                        return jhytql.as<double>();
+                    }
+                    else if (jhytql.is<bool>()) {
+                        return double(jhytql.as<bool>());
+                    }
+                    else if (jhytql.is<std::string>()) {
+                        std::string jhy = jhytql.as<std::string>();
+                        std::regex r_int("([1-9][0-9]*|0+)");
+                        std::regex r_double("([0-9]+.|.[0-9]+|[0-9]+.[0-9]+)");
+                        // std::cout << jhytql.as<std::string>() << std::endl;
+                        if (std::regex_match(jhy, r_int))
+                            return std::atof(jhy.c_str());
+                        else if (std::regex_match(jhy, r_double)) {
+                            return std::atof(jhy.c_str());
+                        }
+                        else if (jhy == "True")
+                            return BigInt(1);
+                        else if (jhy == "False")
+                            return BigInt(0);   
+                        else
+                            assert(false);
+                    }
+                    else {
+                        // err
+                        assert(false);
+                    }
+                } else if (funcName == "str") {
+                    assert(paras.size() == 1);
+                    Any jhytql = paras[0].as<sjtu::funcArg>().value;
+                    if (jhytql.is<BigInt>()) {
+                        return jhytql.as<BigInt>().to_string();
+                    }
+                    else if (jhytql.is<double>()) {
+                        return std::to_string(jhytql.as<double>());
+                    }
+                    else if (jhytql.is<bool>()) {
+                        return jhytql.as<bool>() ? std::string("True") : std::string("False");
+                    }
+                    else if (jhytql.is<std::string>()) {
+                        return jhytql.as<std::string>();
+                    }
+                    else {
+                        // err
+                        assert(false);
+                    }
                 }
                 
                 if (!program.funcs.count(funcName)) {
