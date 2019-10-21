@@ -50,6 +50,13 @@ public:
 			}
 			assert(opcode == 0);
 		}
+        else if (a.is<std::string>() && b.is<BigInt>()) {
+            if (opcode == 2)
+                return a;
+            else {
+                //err
+            }
+        }
 		else if ((a.is<double>() || a.is<BigInt>() || a.is<bool>()) &&
 				 (b.is<double>() || b.is<BigInt>() || b.is<bool>())) {
 			if (a.is<double>() || b.is<double>()) {
@@ -529,6 +536,11 @@ public:
                 } else {
                     for (size_t j = 0;j < contents.size();++j) {
                         *(contents.at(j).as<Any*>()) = result[j];
+                        if (result[j].is<BigInt>()) {
+                            BigInt it = contents.at(j).as<Any*>()->as<BigInt>();
+                            int a;
+                            a = 1;
+                        }
                     }
                 }
             }
@@ -566,6 +578,9 @@ public:
 
     antlrcpp::Any visitReturn_stmt(Python3Parser::Return_stmtContext *ctx) override 
     {
+        if (ctx->testlist() == nullptr) {
+            return sjtu::flowRet(3, sjtu::none_t());
+        }
         auto ret = visit(ctx->testlist()).as<std::shared_ptr<anyV_t>>();
         if (ret->size() == 1) {
             return sjtu::flowRet(3, ret->operator[](0));
@@ -1076,9 +1091,11 @@ public:
     {
         auto ret = std::make_shared<anyV_t>(anyV_t(ctx->test().size()));
         size_t i = 0;
-        Any result;
         for (auto testEle : ctx->test()) {
             ret->operator[](i++) = visit(testEle);
+        }
+        if (ret->size() == 1 && isList(ret->operator[](0))) {
+            return ret->operator[](0);
         }
         return ret;
     }
