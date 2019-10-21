@@ -51,11 +51,28 @@ public:
 			assert(opcode == 0);
 		}
         else if (a.is<std::string>() && b.is<BigInt>()) {
-            if (opcode == 2)
-                return a;
+            if (opcode == 2) {
+                std::string ret, tmp = a.as<std::string>();
+                for (BigInt i = 1, j = b.as<BigInt>(); i <= b; i = i + BigInt(1))
+                    ret = ret + tmp;
+                return ret;
+            }
             else {
                 //err
             }
+            assert(opcode == 2);
+        }
+        else if (b.is<std::string>() && a.is<BigInt>()) {
+            if (opcode == 2) {
+                std::string ret, tmp = b.as<std::string>();
+                for (BigInt i = 1, j = a.as<BigInt>(); i <= b; i = i + BigInt(1))
+                    ret = ret + tmp;
+                return ret;
+            }
+            else {
+                //err
+            }
+            assert(opcode == 2);
         }
 		else if ((a.is<double>() || a.is<BigInt>() || a.is<bool>()) &&
 				 (b.is<double>() || b.is<BigInt>() || b.is<bool>())) {
@@ -81,7 +98,6 @@ public:
 					return da * db;
 				else if (opcode == 3)
 					return da / db;
-                puts("!!!");
                 assert(opcode != 4 && opcode != 5);
 			}
 			else {
@@ -944,6 +960,25 @@ public:
                             return BigInt(0);   
                         else
                             assert(false);
+                    }
+                    else {
+                        // err
+                        assert(false);
+                    }
+                } else if (funcName == "bool") {
+                    assert(paras.size() == 1);
+                    Any jhytql = paras[0].as<sjtu::funcArg>().value;
+                    if (jhytql.is<BigInt>()) {
+                        return jhytql.as<BigInt>() != BigInt(0);
+                    }
+                    else if (jhytql.is<double>()) {
+                        return jhytql.as<double>() != 0.0;
+                    }
+                    else if (jhytql.is<bool>()) {
+                        return jhytql.as<bool>();
+                    }
+                    else if (jhytql.is<std::string>()) {
+                        return jhytql.as<std::string>() != std::string();
                     }
                     else {
                         // err
