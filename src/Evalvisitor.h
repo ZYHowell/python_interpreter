@@ -379,7 +379,7 @@ public:
                 std::cout << "False";
             }
         } else if (it.is<double>()) {
-			std::cout << it.as<double>();
+			std::cout <<std::fixed<<std::setprecision(6)<< it.as<double>();
 		} else if (it.is<BigInt>()) {
         	std::cout << it.as<BigInt>();
         } else if (it.is<std::string>()) {
@@ -759,9 +759,13 @@ public:
                 if (!gtEq(expre[fir], expre[!fir]))
                     return false;
             }
-            else{
+            else if(op->LT_EQ()!= nullptr){
                 if (!lsEq(expre[fir], expre[!fir]))
                     return false;
+            }else if(op->NOT_EQ_2()){
+                if(equals(expre[fir], expre[!fir])) {
+                    return false;
+                }
             }
             fir = !fir;
         }
