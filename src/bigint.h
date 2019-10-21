@@ -218,6 +218,7 @@ public:
     friend BigInt operator*(const BigInt &lhs, const BigInt &rhs)
     {
         BigInt res;
+        res.nega=lhs.nega^rhs.nega;
         res.val.resize(lhs.size()+rhs.size());
         for (int i = 0; i < lhs.size(); i++) {
             for (int j = 0; j < rhs.size(); j++) {
