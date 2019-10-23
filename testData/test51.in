@@ -1,0 +1,7 @@
+def f(a):
+    return g(a)
+
+def g(a):
+    return 2 * a
+
+print(f(f('a')))

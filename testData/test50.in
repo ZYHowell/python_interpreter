@@ -1,0 +1,11 @@
+def f(a, b):
+    if a < 0 or b < 0:
+        return 0
+    if (a == 0 and b == 0):
+        return 0
+    print('a = ', a, 'b = ', b)
+    f(a - 1, b)
+    f(a, b - 1)
+    return a + b
+print(f(b = f(a = 2, b = 3), a = 3))
+
