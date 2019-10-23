@@ -16,21 +16,42 @@ namespace sjtu
         std::string detail = "";
     public:
         exception() {}
+        exception(const std::string &var, const std::string &det = ""):variant(var), detail(det){}
         exception(const exception &ec) : variant(ec.variant), detail(ec.detail) {}
         virtual std::string what() {
-            return variant + " " + detail;
+            return variant + ": " + detail;
         }
     };
 
-    class Cpp_is_rubbish : public exception{};
+    class typeError : public exception 
+    {
+    public:
+        typeError(const std::string &var = "", const std::string &det = ""):exception(var, det){}
+    };
 
-    class index_out_of_bound : public exception {};
+    class illegalExpression : public exception 
+    {
+    public:
+        illegalExpression(const std::string &var = "", const std::string &det = ""):exception(var, det){}
+    };
 
-    class runtime_error : public exception {};
+    class valueError : public exception 
+    {
+    public:
+        valueError(const std::string &var = "", const std::string &det = ""):exception(var, det){}
+    };
 
-    class invalid_iterator : public exception {};
+    class syntaxError : public exception 
+    {
+    public:
+        syntaxError(const std::string &var = "", const std::string &det = ""):exception(var, det){}
+    };
 
-    class container_is_empty : public exception {};
+    class nameError : public exception 
+    {
+    public:
+        nameError(const std::string &var = "", const std::string &det = ""):exception(var, det){}
+    };
 
     class flowRet 
     {
