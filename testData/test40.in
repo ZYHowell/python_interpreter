@@ -1,4 +1,5 @@
-def calc(a, b, c, d): # a / b + c / d
+# a / b + c / d
+def calc(a, b, c, d):
     x = a * d + b * c
     y = b * d
     p = x

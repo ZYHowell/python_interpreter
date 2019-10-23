@@ -762,7 +762,8 @@ public:
             else if(op->LT_EQ()!= nullptr){
                 if (!lsEq(expre[fir], expre[!fir]))
                     return false;
-            }else if(op->NOT_EQ_2()){
+            }
+            else if(op->NOT_EQ_2()){
                 if(equals(expre[fir], expre[!fir])) {
                     return false;
                 }
@@ -1078,7 +1079,7 @@ public:
     antlrcpp::Any visitTrailer(Python3Parser::TrailerContext *ctx) override 
     {
         if (ctx->arglist() != nullptr) {
-            return visit(ctx->arglist()).as<std::shared_ptr<anyV_t>>();
+            return visit(ctx->arglist());
         } else {
             return std::make_shared<anyV_t>(anyV_t());
         }
@@ -1087,6 +1088,9 @@ public:
     antlrcpp::Any visitAtom(Python3Parser::AtomContext *ctx) override 
     {
         if (program.checkIsName) {
+            if (program.isFuncInit) {
+                return ctx->NAME()->toString();
+            }
             if (ctx->NAME() != nullptr) {
                 return program.getValue(ctx->NAME()->toString());
             }
@@ -1149,7 +1153,6 @@ public:
         if (!args.size()) {
             return std::make_shared<anyV_t>(anyV_t());
         }
-
         for (auto arg : args) {
             ret->at(i) = visit(arg);
             if (ret->at(i).as<sjtu::funcArg>().type) isPositional = true;
@@ -1168,7 +1171,10 @@ public:
         if (tests.size() == 1) {
             return sjtu::funcArg(visit(tests[0]));
         } else {
+            program.checkIsName = program.isFuncInit = true;
             auto ret = visit(tests[0]);
+            program.checkIsName = program.isFuncInit = false;
+            assert(ret.is<std::string>());
             return sjtu::funcArg(visit(tests[1]), 1, ret.as<std::string>());
         }
     }

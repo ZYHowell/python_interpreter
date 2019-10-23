@@ -1,16 +1,17 @@
-def swap(x, y):
-    tmp = x
-    x = y
-    y = tmp
-    return x, y
+#Argument Test
+def swap(num1, num2):
+    tmp = num1
+    num1 = num2
+    num2 = tmp
+    return num1, num2
 
 num1 = 10
 num2 = 10 + 10
 
-num1, num2 = swap(num1, num2)
+swap(num1, num2)
 print(num1)
 print(num2)
 
-num1, num2 = num2, num1
+num1, num2 = swap(num1,num2)
 print(num1)
 print(num2)

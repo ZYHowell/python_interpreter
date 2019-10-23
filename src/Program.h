@@ -31,11 +31,12 @@ class Program
     using Any = antlrcpp::Any;
 public:
     bool checkIsName;
+    bool isFuncInit;
     std::stack<Frame> frames;
     std::map<std::string,Function> funcs;
     Frame global;
 public:
-    Program():checkIsName(false), frames(), funcs(), global(){}
+    Program():checkIsName(false), isFuncInit(false),frames(), funcs(), global(){}
     antlrcpp::Any* getValue(std::string name)
     {
         if (!frames.empty()) {
