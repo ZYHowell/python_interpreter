@@ -53,7 +53,7 @@ public:
         else if (a.is<std::string>() && b.is<BigInt>()) {
             if (opcode == 2) {
                 std::string ret, tmp = a.as<std::string>();
-                for (BigInt i = 1, j = b.as<BigInt>(); i <= b; i = i + BigInt(1))
+                for (BigInt i = 1, j = b.as<BigInt>(); i <= j; i = i + BigInt(1))
                     ret = ret + tmp;
                 return ret;
             }
@@ -65,7 +65,7 @@ public:
         else if (b.is<std::string>() && a.is<BigInt>()) {
             if (opcode == 2) {
                 std::string ret, tmp = b.as<std::string>();
-                for (BigInt i = 1, j = a.as<BigInt>(); i <= b; i = i + BigInt(1))
+                for (BigInt i = 1, j = a.as<BigInt>(); i <= j; i = i + BigInt(1))
                     ret = ret + tmp;
                 return ret;
             }
