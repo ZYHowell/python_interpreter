@@ -7,4 +7,6 @@ for i in range(54):
     print("./python_interpreter "+str(i)+" > temp/test"+str(i)+".out")
     os.system("./python_interpreter "+str(i)+" > temp/test"+str(i)+".out")
     if not filecmp.cmp("testData/test"+str(i)+".out","temp/test"+str(i)+".out"):
-        print(i,"wrong")
+        f=open("testData/test"+str(i)+".in",mode='r')
+        title=f.readline()[1:]
+        print("test",i,"wrong:",title)
