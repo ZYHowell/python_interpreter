@@ -1,3 +1,4 @@
+#comprehensive
 b = 0
 
 def test1_f(a):
