@@ -1,3 +1,4 @@
+#Local Variable Test
 bool1 = True or False
 bool2 = True and False
 var = 1
@@ -12,4 +13,4 @@ if not not True:
         three = two + 1
         var -= two + three
     print(var)
-print(var)      
+print(var)

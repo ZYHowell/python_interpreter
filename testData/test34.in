@@ -1,3 +1,4 @@
+#Function as Argument
 def toString(num):
     return str(num)
 

@@ -1,3 +1,4 @@
+#Fast Power
 def pow(m, n, mod):
     ans = 1
     while n:

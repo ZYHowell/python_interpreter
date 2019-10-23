@@ -1,3 +1,4 @@
+#Factorization
 def factor(x) :
     i = 2
     while True:

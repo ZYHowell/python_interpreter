@@ -1,3 +1,4 @@
+#Short Circuit!
 def print1():
     print("1")
     return True
