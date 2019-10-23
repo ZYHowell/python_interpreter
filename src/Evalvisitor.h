@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <regex>
+#include <string>
 #include "Python3BaseVisitor.h"
 #include "Program.h"
 #include "exceptions.h"
@@ -41,36 +42,51 @@ public:
      * 4 //
      * 5 %
 	 */
-	antlrcpp::Any op(antlrcpp::Any a, antlrcpp::Any b, int opcode) {
+
+    inline std::string opToString(int opc) {
+        switch (opc) {
+            case 0: return "+";
+            case 1: return "-";
+            case 2: return "*";
+            case 3: return "/";
+            case 4: return "//";
+            case 5: return "%";
+        }
+    }
+
+	Any op(antlrcpp::Any a, antlrcpp::Any b, int opcode) {
 		if (a.is<std::string>() && b.is<std::string>()) {
 			if (opcode == 0)
 				return a.as<std::string>() + b.as<std::string>();
 			else {
-				//err
+                std::string it = std::string("unsupported operand type(s) for") + opToString(opcode) + std::string("'str' and 'str'");
+				throw(sjtu::typeError("TypeError in op", it));
 			}
 			assert(opcode == 0);
 		}
         else if (a.is<std::string>() && b.is<BigInt>()) {
             if (opcode == 2) {
                 std::string ret, tmp = a.as<std::string>();
-                for (BigInt i = 1, j = b.as<BigInt>(); i <= b; i = i + BigInt(1))
+                for (BigInt i = 1, j = b.as<BigInt>(); i <= j; i = i + BigInt(1))
                     ret = ret + tmp;
                 return ret;
             }
             else {
-                //err
+                std::string it = std::string("unsupported operand type(s) for") + opToString(opcode) + std::string("'str' and 'int'");
+                throw(sjtu::typeError("TypeError in op", it));
             }
             assert(opcode == 2);
         }
         else if (b.is<std::string>() && a.is<BigInt>()) {
             if (opcode == 2) {
                 std::string ret, tmp = b.as<std::string>();
-                for (BigInt i = 1, j = a.as<BigInt>(); i <= b; i = i + BigInt(1))
+                for (BigInt i = 1, j = a.as<BigInt>(); i <= j; i = i + BigInt(1))
                     ret = ret + tmp;
                 return ret;
             }
             else {
-                //err
+                std::string it = std::string("unsupported operand type(s) for") + opToString(opcode) + std::string("'int' and 'str'");
+                throw(sjtu::typeError("typeError in op", it));
             }
             assert(opcode == 2);
         }
@@ -125,7 +141,7 @@ public:
 			}
 		}
 		else {
-			// err
+			throw(sjtu::typeError("typeError in op", "complex"));
 		}
 	}
 
@@ -135,7 +151,7 @@ public:
     inline bool toBool(const Any &it)
     {
         if (isList(it)) {
-            //err
+            return true;
         }
         if (it.is<std::string>()) {
             return it.as<std::string>() != "";
@@ -189,7 +205,7 @@ public:
 			}
         }
         else {
-        	// err
+        	throw(sjtu::typeError("typeError in lessThan", "complex"));
         }
     }
     inline bool greaterThan(const Any &a, const Any &b)
@@ -229,7 +245,7 @@ public:
 			}
 		}
 		else {
-			// err
+			throw(sjtu::typeError("typeError in greaterThan", "complex"));
 		}
     }
     inline bool equals(const Any &a, const Any &b)
@@ -269,7 +285,7 @@ public:
 			}
 		}
 		else {
-			// err
+			throw(sjtu::typeError("typeError in equals", "complex"));
 		}
     }
     inline bool gtEq(const Any &a, const Any &b)
@@ -309,7 +325,7 @@ public:
 			}
 		}
 		else {
-			// err
+			throw(sjtu::typeError("typeError in gtEq", "complex"));
 		}
     }
     inline bool lsEq(const Any &a, const Any &b)
@@ -349,7 +365,7 @@ public:
 			}
 		}
 		else {
-			// err
+			throw(sjtu::typeError("typeError in lsEq", "complex"));
 		}
     }
 
@@ -368,7 +384,7 @@ public:
 
     /*
      * The following two functions are used to deal with the print function, 
-     * which supports printing a turple of turples and other elements.
+     * which supports printing a tuple of tuples and other elements.
     */
     void printEle(const Any &it)
     {
@@ -396,10 +412,10 @@ public:
     void printVector(const anyV_t &eles) 
     {
         for (size_t i = 0;i < eles.size();++i) {
-            if (i) std::cout << ", ";
+            if (i) std::cout << " ";
             if (eles[i].is<sjtu::funcArg>()) {
                 if (eles[i].as<sjtu::funcArg>().type) {
-                    //err
+                    throw(sjtu::typeError("TypeError in print", "invalid keyword argument for print()"));
                 } else {
                     printEle(eles[i].as<sjtu::funcArg>().value);
                 }
@@ -421,7 +437,9 @@ public:
             if (ret.is<sjtu::none_t>()) continue;
             else {
                 if (ret.as<sjtu::flowRet>().type != 3) {
-                    //err
+                    std::string it = ret.as<sjtu::flowRet>().type == 1 ? "'continue'" : "'break'";
+                    it += "outside loop";
+                    throw(sjtu::syntaxError("syntaxError(?) in file_input",  it));
                 }
                 else {
                     ret = ret.as<sjtu::flowRet>().retValue;
@@ -509,12 +527,13 @@ public:
             program.checkIsName = false;
 
             if (testEle.size() != 1 || result.size() != 1) {
-                //err
+                throw(sjtu::illegalExpression("illegalExpression", "argumented assignment meets a tuple"));
+                //in fact, if testEle.size != 1, the error is "illegalExp", but if result.size != 1, the error is TypeError
             }
             auto content = testEle[0].as<Any*>();
 
             if (result[0].is<sjtu::none_t>()) {
-            	//err
+            	throw(sjtu::typeError("TypeError in augassignment", "complex"));
             }
 
             //bool, double, BigInt, std:string
@@ -531,7 +550,7 @@ public:
             } else if (ctx->augassign()->MOD_ASSIGN() != nullptr) {
                 *content = op(*content, result[0], 5);
             } else {
-                // err
+                throw(sjtu::exception("i do not know what it is in augassignment"));
             }
 
         } else if (ctx->ASSIGN().size()){
@@ -548,7 +567,12 @@ public:
 
 
                 if (contents.size() != result.size()) {
-                    //err occurs like a,b = 1,2,3
+                    std::string it;
+                    it = contents.size() > result.size() ? "not enough values to unpack" : "too many values to unpack";
+                    it += "(expected " + std::to_string(contents.size());
+                    if (contents.size() > result.size()) it += ", got " + std::to_string(result.size());
+                    it += ")";
+                    throw(sjtu::valueError("ValueError in assignment", it));
                 } else {
                     for (size_t j = 0;j < contents.size();++j) {
                         *(contents.at(j).as<Any*>()) = result[j];
@@ -687,7 +711,7 @@ public:
             return visit(ctx->and_test(0));
         } else {
             if (program.checkIsName) {
-                //err
+                throw(sjtu::syntaxError("syntaxError(?) in visitOr_test", "cannot assign to operator"));
             }
             if (toBool(visit(ctx->and_test(0)))) {
                 return true;
@@ -703,7 +727,7 @@ public:
             return visit(ctx->not_test(0));
         } else {
             if (program.checkIsName) {
-                //err
+                throw(sjtu::syntaxError("syntaxError(?) in visitAnd_test", "cannot assign to operator"));
             }
             if (!toBool(visit(ctx->not_test(0)))) {
                 return false;
@@ -717,7 +741,7 @@ public:
     {
         if (ctx->NOT() != nullptr){
             if (program.checkIsName) {
-                //err
+                throw(sjtu::syntaxError("syntaxError(?) in visitNot_test", "cannot assign to operator"));
             }
             return !toBool(visit(ctx->not_test()));
         } else {
@@ -738,7 +762,7 @@ public:
         bool fir = 0;
         expre[0] = visit(ctx->arith_expr(num));
         if (program.checkIsName) {
-            //err
+            throw(sjtu::syntaxError("syntaxError(?) in visitComparison", "cannot assign to operator"));
         }
         for (auto op : comp_op){
             expre[!fir] = visit(ctx->arith_expr(++num));
@@ -790,11 +814,14 @@ public:
             return ret;
         }
 
-        if (program.checkIsName || ret.is<sjtu::none_t>()) {
-            //err
+        if (program.checkIsName) {
+            throw(sjtu::syntaxError("SyntaxError(?) in visitArith_expr", "cannot assign to operator"));
+        }
+        if (ret.is<sjtu::none_t>()) {
+            throw(sjtu::typeError("TypeError in Arith_expr", "None exists"));
         }
         if (isList(ret)) {
-            //err
+            throw(sjtu::typeError("TypeError in Arith_expr", "sorry for not support tuple calc"));
         }
 
 
@@ -825,12 +852,15 @@ public:
 			return ret;
 		}
 
-		if (program.checkIsName || ret.is<sjtu::none_t>()) {
-			//err
-		}
-		if (isList(ret)) {
-			//err
-		}
+		if (program.checkIsName) {
+            throw(sjtu::syntaxError("SyntaxError(?) in visitTerm", "cannot assign to operator"));
+        }
+        if (ret.is<sjtu::none_t>()) {
+            throw(sjtu::typeError("TypeError in visitTerm", "None exists"));
+        }
+        if (isList(ret)) {
+            throw(sjtu::typeError("TypeError in visitTerm", "sorry for not support tuple calc"));
+        }
 
         vector<std::pair<int, int> > opcodeList;
         // opcodeList.resize(ctx->factor().size());
@@ -864,7 +894,7 @@ public:
             return visit(ctx->atom_expr());
         } else {
             if (program.checkIsName) {
-                //err
+                throw(sjtu::syntaxError("SyntaxError(?) in visitFactor", "cannot assign to operator"));
             }
             Any ret = visit(ctx->factor());
 
@@ -879,7 +909,7 @@ public:
 				return ret.as<BigInt>() * BigInt(flag);
             }
             else {
-				//err
+				throw(sjtu::typeError("TypeError in visitFactor", "complex"));
 			}
         }
     }
@@ -888,10 +918,10 @@ public:
     {
         if (ctx->trailer() != nullptr) {
             if (program.checkIsName) {
-                //err
+                throw(sjtu::syntaxError("SyntaxError(?) in visitAtom_expr", "cannot assign to operator"));
             }
             if (ctx->atom()->NAME() == nullptr) {
-                //err
+                throw(sjtu::typeError("TypeError in Atom_expr", "not callable"));
             } else {
                 std::string funcName = ctx->atom()->NAME()->toString();
                 auto paras = *visit(ctx->trailer()).as<std::shared_ptr<anyV_t>>();
@@ -916,8 +946,6 @@ public:
                         std::string jhy = jhytql.as<std::string>();
                         std::regex r_int("([1-9][0-9]*|0+)");
                         std::regex r_double("([0-9]+.|.[0-9]+|[0-9]+.[0-9]+)");
-                        // std::regex r_double("[0-9]+");
-                        // std::cout << jhytql.as<std::string>() << std::endl;
                         if (std::regex_match(jhy, r_int))
                             return BigInt(jhy);
                         else if (std::regex_match(jhy, r_double)) {
@@ -934,7 +962,7 @@ public:
                             assert(false);
                     }
                     else {
-                        // err
+                        throw(sjtu::typeError("TypeError in Atom_expr", "int() argument must be a string, a bytes-like object or a number, not..." ));
                         assert(false);
                     }
                 } else if (funcName == "float") {
@@ -959,15 +987,19 @@ public:
                         else if (std::regex_match(jhy, r_double)) {
                             return std::atof(jhy.c_str());
                         }
-                        else if (jhy == "True")
+                        else if (jhy == "True"){
                             return BigInt(1);
-                        else if (jhy == "False")
-                            return BigInt(0);   
-                        else
+                        }
+                        else if (jhy == "False"){
+                            return BigInt(0);
+                        } 
+                        else{
+                            throw(sjtu::valueError("ValueError in Atom_expr", std::string("could not convert string to float: '") + jhy + std::string("'")));
                             assert(false);
+                        }
                     }
                     else {
-                        // err
+                        throw(sjtu::typeError("TypeError in Atom_expr", "float() argument must be a string, a bytes-like object or a number, not..." ));
                         assert(false);
                     }
                 } else if (funcName == "bool") {
@@ -986,7 +1018,7 @@ public:
                         return jhytql.as<std::string>() != std::string();
                     }
                     else {
-                        // err
+                        throw(sjtu::typeError("TypeError in Atom_expr", "bool() argument must be a string, a bytes-like object or a number, not..." ));
                         assert(false);
                     }
                 } else if (funcName == "str") {
@@ -1005,13 +1037,15 @@ public:
                         return jhytql.as<std::string>();
                     }
                     else {
-                        // err
+                        throw(sjtu::exception("in Atom_expr", "sorry for not support other types"));
                         assert(false);
                     }
                 }
                 
                 if (!program.funcs.count(funcName)) {
-                    //err
+                    if (program.frames.top().memory.count(funcName))
+                        throw(sjtu::typeError("TypeError in Atom_expr", std::string("'") + funcName + std::string("' is not callable")));
+                    else throw(sjtu::nameError("NameError in Atom_expr", std::string("'") + funcName + std::string("' is not defined")));
                 }
                 
                 Function *func = &program.funcs[funcName];
@@ -1036,7 +1070,7 @@ public:
                         nowName = (func->params)[nowFunc++].name;
                     }
                     if (mem->count(nowName)) {
-                        //err
+                        throw(sjtu::typeError("TypeError in Atom_expr", funcName + std::string("() got multiple values for argument '") + nowName + std::string("'")));
                     } else {
                         mem->insert(std::pair<std::string, Any>
                                         (nowName, paras[i].as<sjtu::funcArg>().value));
@@ -1050,7 +1084,8 @@ public:
                             mem->insert(std::pair<std::string, Any>
                                             (nowName, func->params[i].value));
                         } else {
-                            //err
+                            throw(sjtu::typeError("TypeError in Atom_expr", funcName + std::string("() missing required positional argument '") + nowName + std::string("'")));
+                            //CAN BE IMPROVED
                         }
                     }
                 }
@@ -1061,14 +1096,16 @@ public:
 
                 if (ret.is<sjtu::flowRet>()) {
                     if (ret.as<sjtu::flowRet>().type != 3) {
-                    //err like: def a(): break/continue
+                        std::string it = ret.as<sjtu::flowRet>().type == 1 ? "'continue'" : "'break'";
+                        it += "outside loop";
+                        throw(sjtu::syntaxError("syntaxError(?) in Atom_expr",  it));
                     } else {
                         return ret.as<sjtu::flowRet>().retValue;        
                     }
                 } else if (ret.is<sjtu::none_t>()){
                     return ret;
                 } else {
-                    //err
+                    throw(sjtu::exception("unexpectedError in Atom_expr"));
                 }
             }
         } else {
@@ -1095,7 +1132,7 @@ public:
                 return program.getValue(ctx->NAME()->toString());
             }
             else {
-                //err
+                throw(sjtu::syntaxError("SyntaxError(?) in visitAtom", "cannot assign to literal/keyword"));
             }
         }
         if (ctx->NUMBER() != nullptr){
@@ -1157,7 +1194,7 @@ public:
             ret->at(i) = visit(arg);
             if (ret->at(i).as<sjtu::funcArg>().type) isPositional = true;
             else if (isPositional) {
-                //err
+                throw(sjtu::syntaxError("SyntaxError in visitArglist", "non-default argument follows default argument"));
             }
             ++i;
 
