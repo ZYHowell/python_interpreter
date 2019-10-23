@@ -396,7 +396,7 @@ public:
     void printVector(const anyV_t &eles) 
     {
         for (size_t i = 0;i < eles.size();++i) {
-            if (i) std::cout << ", ";
+            if (i) std::cout << " ";
             if (eles[i].is<sjtu::funcArg>()) {
                 if (eles[i].as<sjtu::funcArg>().type) {
                     //err
