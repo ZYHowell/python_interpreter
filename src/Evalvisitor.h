@@ -862,7 +862,7 @@ public:
             throw(sjtu::typeError("TypeError in visitTerm", "sorry for not support tuple calc"));
         }
 
-        vector<std::pair<int, int> > opcodeList;
+        std::vector<std::pair<int, int> > opcodeList;
         // opcodeList.resize(ctx->factor().size());
 
         // std::cout << ctx->STAR().size() << " " << ctx->DIV().size() << " " << ctx->IDIV().size() << " " << ctx->MOD().size() << std::endl;
